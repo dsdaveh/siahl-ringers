@@ -1,0 +1,60 @@
+---
+title: "SIAHL Stats EDA"
+format: html
+editor: visual
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+```
+
+```{r}
+# Define the URL
+url <- "https://stats.sharksice.timetoscore.com/display-stats.php?league=1&season=56"
+
+# Read the webpage
+webpage <- read_html(url)
+
+# Scrape the Adult Division names
+divisions <- webpage %>%
+  html_nodes("td.rowhead") %>%
+  html_text(trim = TRUE) %>%
+  .[str_detect(., "Adult Division")]
+
+# Find URLs of each team page
+team_urls <- webpage %>%
+  html_nodes("a") %>%
+  html_attr("href") %>%
+  .[str_detect(., "team_id=")] %>%
+  paste0("https://stats.sharksice.timetoscore.com/", .)
+
+# Initialize an empty tibble for storing results
+final_data <- tibble()
+
+# Loop over each team URL
+for (url in team_urls) {
+  team_webpage <- read_html(url)
+  
+  # Get the team name
+  team_name <- team_webpage %>%
+    html_nodes("title") %>%
+    html_text(trim = TRUE) %>%
+    str_replace_all("San Jose Sharks Ice Team Statistics - ", "")
+  
+  # Get the Adult Division name
+  adult_division <- divisions[which.max(str_detect(team_urls, url))]
+  
+  # Get the player stats table
+  player_stats <- team_webpage %>%
+    html_nodes("table") %>%
+    .[2] %>%
+    html_table(header = TRUE) %>%
+    .[[1]] %>%
+    mutate(Team = team_name, Adult_Division = adult_division)
+  
+  # Append the table to final_data
+  final_data <- bind_rows(final_data, player_stats)
+}
+```
