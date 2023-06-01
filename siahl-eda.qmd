@@ -10,13 +10,18 @@ editor: visual
 library(tidyverse)
 library(rvest)
 library(xml2)
+library(polite)
+```
+
+```{r}
+# Define the URL
+base_url <- "https://stats.sharksice.timetoscore.com/"
+session <- bow(base_url)
 ```
 
 Get the team division information
 
 ```{r}
-# Define the URL
-base_url <- "https://stats.sharksice.timetoscore.com/"
 url <- paste0(base_url, "display-stats.php?league=1&season=56")
 
 # Read the webpage
@@ -63,12 +68,15 @@ Get each player
 
 ```{r}
 # Initialize an empty tibble for storing results
-players <- tibble()
+#players <- tibble()
 
 # Loop over each team URL
 for (iteam in 1:nrow(teams)) {
+    message(sprintf("scraping stats for %s in %s (%d/%d)", 
+        teams$team[iteam], teams$division[iteam], iteam, nrow(teams)))
+  
 
-  team_webpage <- read_html(teams$team_stats[iteam])
+ team_webpage <- read_html(teams$team_stats[iteam])
   
     player_stats <- team_webpage %>%
     html_nodes("table") %>%
@@ -86,5 +94,10 @@ for (iteam in 1:nrow(teams)) {
   
   # Append the table to final_data
   players <- bind_rows(players, player_stats)
+  
+  Sys.sleep(10)
 }
+
+save_file = sprintf("player_stats-%s.RDS", now())
+saveRDS(players, file = save_file)
 ```
