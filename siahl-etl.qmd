@@ -71,7 +71,7 @@ Get each player
 
 ```{r}
 # Initialize an empty tibble for storing results
-#players <- tibble()
+players <- tibble()
 
 # Loop over each team URL
 for (iteam in 1:nrow(teams)) {
@@ -92,8 +92,10 @@ for (iteam in 1:nrow(teams)) {
     names(player_stats) <- header_row
     
     player_stats <- player_stats %>% 
-        mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}")) %>% 
-        mutate(Team = teams$team[iteam], Division = teams$division[iteam])
+        mutate(across(where(~ all(!suppressWarnings(is.na(as.numeric(.))))), as.numeric, .names = "{.col}")) %>% 
+        mutate(Team = teams$team[iteam], 
+               Division = teams$division[iteam], 
+               Rank = teams$division_rank[iteam])
 
   
   # Append the table to final_data
