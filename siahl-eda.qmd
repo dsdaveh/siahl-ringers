@@ -17,13 +17,10 @@ players <- readRDS(file = "player_stats-2023-05-31 19:08:26.236042.RDS") %>%
 # add Division Rank, but this should get moved the ETL portion
 # for now we rely on the knowledge that the data was collected in ranked order
 
-team_ranks <- players %>% 
-    group_by(Division, Team) %>% 
-    summarise(.groups = 'drop_last') %>% 
-    group_by(Division) %>% 
-    summarise(division_rank = 1:n() )
-
-players <- left_join(players, team_ranks, by = c("Team", "Division"))
+# team_ranks <- team_ranks <- readRDS(file = '~/Downloads/teams.RDS') %>% 
+#     select(Team = team, Division = division , Rank = division_rank) 
+# 
+# players <- left_join(players, team_ranks, by = c("Team", "Division"))
 
 
 ```
@@ -74,7 +71,7 @@ teams <- players %>%
     mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0))
 
 team_stats <- teams %>% 
-    group_by(Team, Division) %>% 
+    group_by(Team, Division, Rank) %>% 
     summarise(ringer_count = sum(ringer_count, na.rm = TRUE),
               ringer_games_count = sum(ringer_count * GP, na.rm = TRUE),
               .groups = 'drop')
