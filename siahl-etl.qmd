@@ -92,7 +92,7 @@ for (iteam in 1:nrow(teams)) {
     names(player_stats) <- header_row
     
     player_stats <- player_stats %>% 
-        mutate(across(where(~ all(!suppressWarnings(is.na(as.numeric(.))))), as.numeric, .names = "{.col}")) %>% 
+        mutate(across(3:ncol(.), as.numeric)) %>% 
         mutate(Team = teams$team[iteam], 
                Division = teams$division[iteam], 
                Rank = teams$division_rank[iteam])
@@ -100,7 +100,7 @@ for (iteam in 1:nrow(teams)) {
   
   # Append the table to final_data
   players <- bind_rows(players, player_stats)
-  
+
   Sys.sleep(10)
 }
 
