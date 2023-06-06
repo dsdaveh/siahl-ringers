@@ -8,96 +8,74 @@ editor: visual
 #| message: false
 #| warning: false
 library(tidyverse)
-library(rvest)
-library(xml2)
-library(polite)
+players <- readRDS(file = "player_stats-2023-05-31 19:08:26.236042.RDS") %>% 
+    mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
 ```
 
 ```{r}
-# Define the URL
-base_url <- "https://stats.sharksice.timetoscore.com/"
-session <- bow(base_url)
+
+# add Division Rank, but this should get moved the ETL portion
+# for now we rely on the knowledge that the data was collected in ranked order
+
+team_ranks <- players %>% 
+    group_by(Division, Team) %>% 
+    summarise(.groups = 'drop_last') %>% 
+    group_by(Division) %>% 
+    summarise(division_rank = 1:n() )
+
+players <- left_join(players, team_ranks, by = c("Team", "Division"))
+
+
 ```
 
-Get the team division information
+Players in more than one division
 
 ```{r}
-url <- paste0(base_url, "display-stats.php?league=1&season=56")
+multi_div <- players %>% 
+    count(Name) %>% 
+    filter(n > 1)
 
-# Read the webpage
-webpage <- read_html(url)
-
-# Scrape the Adult Division names and team rows
-table_rows <- webpage %>%
-  html_elements("tr") 
-
-# Initialize an empty tibble for storing results
-teams <- tibble()
-
-# Initialize a variable to store the current division
-current_division <- ""
-
-# Loop over each table row
-for (i in 1:length(table_rows)) {
-  # Get the row
-  row <- table_rows[[i]]
-  team_extract <- row %>% html_elements("td a") %>%  html_text(trim = TRUE)
-
-  # Check if it's a division row
-  if (row %>% html_text() %>% str_detect("Adult Division")) {
-    current_division <- row %>% html_text()
-  # Check if it's a team row
-  } else if (length(team_extract) > 0) {
-    team_name <- row %>% html_elements("td a") %>%  html_text(trim = TRUE)
-    team_stats <- paste0(base_url, row %>% html_elements("td a") %>%  html_attr("href"))
-
-    team_data <- tibble(
-      team = team_name,
-      team_id = team_stats %>%  str_extract('\\?team=\\d+') %>% str_extract('\\d+'),
-      team_stats = team_stats,
-      division = current_division %>% str_replace('Adult Division ', '')
-    )
-
-    # Append the team data to final_data
-    teams <- bind_rows(teams, team_data)
-  }
-}
+players_multi <- multi_div %>% 
+    left_join(players, by = "Name") 
 ```
 
-Get each player
+```{r}
+xleague_stats <- players_multi %>% 
+    mutate(PpG = Pts / GP,
+           GpG = Goals / GP,
+           DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>% 
+    group_by(Name) %>% 
+    arrange(Division) %>% 
+    summarise(n_leagues = n(),
+              best_level = min(DivLevel),
+              gp_as_ringer = sum(ifelse(DivLevel > (best_level + 2), GP, 0)),
+              # min_Goals = min(Goals),
+              # max_Goals = max(Goals),
+              # min_Pts = min(Pts),
+              # max_Pts = max(Pts),
+              min_PpG = min(PpG),
+              max_PpG = max(PpG),
+              PpG_spread = last(PpG) - first(PpG),
+              GpG_spread = last(GpG) - first(GpG),
+              Div_spread = last(DivLevel) - first(DivLevel),
+              `L/H Divs` = sprintf("%s-%s", first(Division), last(Division)) )
+```
 
 ```{r}
-# Initialize an empty tibble for storing results
-#players <- tibble()
+ringers <- xleague_stats %>% filter(Div_spread > 2)
+```
 
-# Loop over each team URL
-for (iteam in 1:nrow(teams)) {
-    message(sprintf("scraping stats for %s in %s (%d/%d)", 
-        teams$team[iteam], teams$division[iteam], iteam, nrow(teams)))
-  
+Which teams have the most ringers
 
- team_webpage <- read_html(teams$team_stats[iteam])
-  
-    player_stats <- team_webpage %>%
-    html_nodes("table") %>%
-    .[2] %>%
-    html_table(header = TRUE) %>%
-    .[[1]] 
-    
-    header_row <- player_stats[1, ]
-    player_stats <- player_stats[-1, ]
-    names(player_stats) <- header_row
-    
-    player_stats <- player_stats %>% 
-        mutate(Team = teams$team[iteam], Division = teams$division[iteam])
+```{r}
+teams <- players %>% 
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>% 
+    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>% 
+    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0))
 
-  
-  # Append the table to final_data
-  players <- bind_rows(players, player_stats)
-  
-  Sys.sleep(10)
-}
-
-save_file = sprintf("player_stats-%s.RDS", now())
-saveRDS(players, file = save_file)
+team_stats <- teams %>% 
+    group_by(Team, Division) %>% 
+    summarise(ringer_count = sum(ringer_count, na.rm = TRUE),
+              ringer_games_count = sum(ringer_count * GP, na.rm = TRUE),
+              .groups = 'drop')
 ```
