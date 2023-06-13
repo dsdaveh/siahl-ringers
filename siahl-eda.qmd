@@ -8,21 +8,8 @@ editor: visual
 #| message: false
 #| warning: false
 library(tidyverse)
-players <- readRDS(file = "player_stats-2023-05-31 19:08:26.236042.RDS") %>% 
+players <- readRDS(file = "players_2023_winter.RDS") %>% 
     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
-```
-
-```{r}
-
-# add Division Rank, but this should get moved the ETL portion
-# for now we rely on the knowledge that the data was collected in ranked order
-
-# team_ranks <- team_ranks <- readRDS(file = '~/Downloads/teams.RDS') %>% 
-#     select(Team = team, Division = division , Rank = division_rank) 
-# 
-# players <- left_join(players, team_ranks, by = c("Team", "Division"))
-
-
 ```
 
 Players in more than one division
