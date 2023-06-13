@@ -16,7 +16,7 @@ library(polite)
 ```{r}
 # Define the URL
 base_url <- "https://stats.sharksice.timetoscore.com/"
-session <- bow(base_url)
+#session <- bow(base_url)
 ```
 
 Get the team division information
@@ -77,9 +77,11 @@ players <- tibble()
 for (iteam in 1:nrow(teams)) {
     message(sprintf("scraping stats for %s in %s (%d/%d)", 
         teams$team[iteam], teams$division[iteam], iteam, nrow(teams)))
+    
+    team_name = teams$team[iteam]
   
 
- team_webpage <- read_html(teams$team_stats[iteam])
+    team_webpage <- read_html(teams$team_stats[iteam])
   
     player_stats <- team_webpage %>%
     html_nodes("table") %>%
