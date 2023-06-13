@@ -17,6 +17,18 @@ library(polite)
 # Define the URL
 base_url <- "https://stats.sharksice.timetoscore.com/"
 #session <- bow(base_url)
+
+promote_header <- function(df) { 
+    names(df) <- df[1,]
+    df[-1, ] 
+}
+
+get_scoring_tbl <- function(box_score, home = TRUE) {
+    list_num = ifelse(home, 2, 1)
+    scoring <- box_score[list_num] %>% html_table() %>% .[[1]] %>% 
+        promote_header() %>% 
+        clean_names()
+}
 ```
 
 Get the team division information
@@ -67,31 +79,41 @@ for (i in 1:length(table_rows)) {
 }
 ```
 
-Get each player
+Scrape Game and Player info (loop over teams)
 
 ```{r}
 # Initialize an empty tibble for storing results
-players <- tibble()
+player_file = sprintf("player_stats-%s.RDS", now())
+players <- tibble() 
+
+# games is more intensive, so we leverage existing data
+game_file = "games_stats.RDS"
+if (file.exists(game_file)) {
+    #backup the existing game file
+    backup_name <- str_replace(game_file, '\\.RDS', 
+                               format(file.info(game_file)$mtime, '-%Y-%m-%d-%H%M%S.RDS'))
+    if(file.copy(game_file, backup_name, copy.date = TRUE)) {
+            message('Backed up ', game_file, ' as ', backup_name)
+    } else {
+        warning('Backup failed (existing backup file?)')
+    }
+    games <- readRDS(file = game_file)
+} else {
+    games <- tibble()
+}
 
 # Loop over each team URL
-for (iteam in 1:nrow(teams)) {
+#for (iteam in 1:nrow(teams)) {
+for (iteam in 36:36) {
     message(sprintf("scraping stats for %s in %s (%d/%d)", 
         teams$team[iteam], teams$division[iteam], iteam, nrow(teams)))
     
     team_name = teams$team[iteam]
-  
-
     team_webpage <- read_html(teams$team_stats[iteam])
-  
-    player_stats <- team_webpage %>%
-    html_nodes("table") %>%
-    .[2] %>%
-    html_table(header = TRUE) %>%
-    .[[1]] 
     
-    header_row <- player_stats[1, ]
-    player_stats <- player_stats[-1, ]
-    names(player_stats) <- header_row
+    team_tables <- team_webpage %>% html_nodes("table")
+    player_stats <- team_tables %>% .[2] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header()
+    game_list <-    team_tables %>% .[1] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header()
     
     player_stats <- player_stats %>% 
         mutate(across(3:ncol(.), as.numeric)) %>% 
@@ -106,6 +128,21 @@ for (iteam in 1:nrow(teams)) {
   Sys.sleep(10)
 }
 
-save_file = sprintf("player_stats-%s.RDS", now())
-saveRDS(players, file = save_file)
 ```
+```{r}
+saveRDS(players, file = player_file)
+
+#backup before saving
+if (file.exists(game_file)) {
+    #backup the existing game file
+    backup_name <- str_replace(game_file, '\\.RDS', 
+                               format(file.info(game_file)$mtime, '-%Y-%m-%d-%H%M%S.RDS'))
+    if(file.copy(game_file, backup_name, copy.date = TRUE)) {
+        message('Backed up ', game_file, ' as ', backup_name)
+    } else {
+        warning('Backup failed (existing backup file?)')
+    }
+}
+saveRDS(all_games, file = game_file)
+```
+
