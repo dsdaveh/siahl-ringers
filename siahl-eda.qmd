@@ -10,6 +10,10 @@ editor: visual
 library(tidyverse)
 players <- readRDS(file = "players_2023_winter.RDS") %>% 
     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
+games <- readRDS(file = "games_2023_winter.RDS") %>% 
+    mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
+scorecards <- readRDS(file = 'games_tables.RDS')
+
 ```
 
 Players in more than one division
@@ -62,4 +66,9 @@ team_stats <- teams %>%
     summarise(ringer_count = sum(ringer_count, na.rm = TRUE),
               ringer_games_count = sum(ringer_count * GP, na.rm = TRUE),
               .groups = 'drop')
+```
+
+```{r}
+#WIP
+games %>% count(Game) %>% nrow()
 ```
