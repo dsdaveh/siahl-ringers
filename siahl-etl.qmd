@@ -83,28 +83,30 @@ Scrape Game and Player info (loop over teams)
 
 ```{r}
 # Initialize an empty tibble for storing results
-player_file = sprintf("player_stats-%s.RDS", now())
 players <- tibble() 
+all_games <- tibble()
 
-# games is more intensive, so we leverage existing data
-game_file = "games_stats.RDS"
-if (file.exists(game_file)) {
-    #backup the existing game file
-    backup_name <- str_replace(game_file, '\\.RDS', 
-                               format(file.info(game_file)$mtime, '-%Y-%m-%d-%H%M%S.RDS'))
-    if(file.copy(game_file, backup_name, copy.date = TRUE)) {
-            message('Backed up ', game_file, ' as ', backup_name)
-    } else {
-        warning('Backup failed (existing backup file?)')
-    }
-    games <- readRDS(file = game_file)
+# game_tables is more intensive, so we leverage existing data
+game_tables_file = "games_tables.RDS"
+if (file.exists(game_tables_file)) {
+    game_tables <- readRDS(file = game_tables_file)
 } else {
-    games <- tibble()
+    game_tables <- list()
+}
+
+#game_tables is a global lookup
+get_scoring_html <- function(game_id, verbose = TRUE) {
+    if (is.null(game_tables[[game_id]])) {
+        if (verbose) message('Capturing game ', game_id)
+        game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
+                                 base_url ,str_extract(game_id, '\\d+')) 
+        game_tables[[game_id]] <<- game_url %>% read_html() %>% html_elements(".d25l table") %>% list() 
+    }
+    game_tables[[game_id]]
 }
 
 # Loop over each team URL
-#for (iteam in 1:nrow(teams)) {
-for (iteam in 36:36) {
+for (iteam in 1:nrow(teams)) {
     message(sprintf("scraping stats for %s in %s (%d/%d)", 
         teams$team[iteam], teams$division[iteam], iteam, nrow(teams)))
     
@@ -115,34 +117,66 @@ for (iteam in 36:36) {
     player_stats <- team_tables %>% .[2] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header()
     game_list <-    team_tables %>% .[1] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header()
     
+    #fix duplicate Goals headers
+    game_cols <- names(game_list) 
+    fix_cols <- which(game_cols == 'Goals')
+    game_cols[fix_cols[1]] <- 'Away Goals'
+    game_cols[fix_cols[2]] <- 'Home Goals'
+    names(game_list) <- game_cols
+    
     player_stats <- player_stats %>% 
         mutate(across(3:ncol(.), as.numeric)) %>% 
         mutate(Team = teams$team[iteam], 
                Division = teams$division[iteam], 
                Rank = teams$division_rank[iteam])
+    
+    #get game info but don't process it yet
+    walk(game_list$Game, get_scoring_html, verbose = TRUE)
+    games <- tibble(Team = teams$team[iteam], 
+               Division = teams$division[iteam]
+    ) %>% bind_cols(
+        game_list %>% 
+        select(Game, Home, Away, `Home Goals`, `Away Goals`) %>% 
+        mutate(home = Home == team_name,
+               shootout = str_detect(paste0(`Home Goals`, `Away Goals`), 'S'),
+               `Home Goals` = as.numeric(str_extract(`Home Goals`, '\\d+')),
+               `Away Goals` = as.numeric(str_extract(`Away Goals`, '\\d+')),
+               home_diff = `Home Goals` - `Away Goals`
+        ) 
+    ) 
+    all_games <- bind_rows(all_games, games)
+    
+    
+    
 
   
   # Append the table to final_data
   players <- bind_rows(players, player_stats)
 
-  Sys.sleep(10)
+  Sys.sleep(1)
 }
 
 ```
+
+Save files to disk
+
 ```{r}
+player_file = sprintf("player_stats-%s.RDS", now())
+games_file = sprintf("games_stats-%s.RDS", now())
 saveRDS(players, file = player_file)
+saveRDS(all_games, file = games_file)
 
 #backup before saving
-if (file.exists(game_file)) {
+if (file.exists(game_tables_file)) {
     #backup the existing game file
-    backup_name <- str_replace(game_file, '\\.RDS', 
-                               format(file.info(game_file)$mtime, '-%Y-%m-%d-%H%M%S.RDS'))
-    if(file.copy(game_file, backup_name, copy.date = TRUE)) {
-        message('Backed up ', game_file, ' as ', backup_name)
+    backup_name <- str_replace(game_tables_file, '\\.RDS', 
+                               format(file.info(game__tables_file)$mtime, '-%Y-%m-%d-%H%M%S.RDS'))
+    if(file.copy(game_tables_file, backup_name, copy.date = TRUE)) {
+        message('Backed up ', game_tables_file, ' as ', backup_name)
     } else {
         warning('Backup failed (existing backup file?)')
     }
 }
-saveRDS(all_games, file = game_file)
+saveRDS(game_tables, file = game_tables_file)
 ```
 
