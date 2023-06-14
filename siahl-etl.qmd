@@ -170,7 +170,7 @@ saveRDS(all_games, file = games_file)
 if (file.exists(game_tables_file)) {
     #backup the existing game file
     backup_name <- str_replace(game_tables_file, '\\.RDS', 
-                               format(file.info(game__tables_file)$mtime, '-%Y-%m-%d-%H%M%S.RDS'))
+                               format(file.info(game_tables_file)$mtime, '-%Y-%m-%d-%H%M%S.RDS'))
     if(file.copy(game_tables_file, backup_name, copy.date = TRUE)) {
         message('Backed up ', game_tables_file, ' as ', backup_name)
     } else {
