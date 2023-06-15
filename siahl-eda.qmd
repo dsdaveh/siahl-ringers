@@ -8,6 +8,12 @@ editor: visual
 #| message: false
 #| warning: false
 library(tidyverse)
+library(janitor)
+library(rvest)
+library(xml2)
+
+source('siahl-utils.R')
+
 players <- readRDS(file = "players_2023_winter.RDS") %>% 
     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
 games <- readRDS(file = "games_2023_winter.RDS") %>% 
@@ -70,5 +76,6 @@ team_stats <- teams %>%
 
 ```{r}
 #WIP
-games %>% count(Game) %>% nrow()
+g1 <- scorecards[["373622*"]]
+g1_home <- g1[[1]] %>% get_scoring_tbl(home = TRUE)
 ```

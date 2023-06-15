@@ -11,24 +11,11 @@ library(tidyverse)
 library(rvest)
 library(xml2)
 library(polite)
-```
 
-```{r}
 # Define the URL
 base_url <- "https://stats.sharksice.timetoscore.com/"
-#session <- bow(base_url)
 
-promote_header <- function(df) { 
-    names(df) <- df[1,]
-    df[-1, ] 
-}
-
-get_scoring_tbl <- function(box_score, home = TRUE) {
-    list_num = ifelse(home, 2, 1)
-    scoring <- box_score[list_num] %>% html_table() %>% .[[1]] %>% 
-        promote_header() %>% 
-        clean_names()
-}
+source('siahl-utils.R')
 ```
 
 Get the team division information
@@ -100,7 +87,7 @@ get_scoring_html <- function(game_id, verbose = TRUE) {
         if (verbose) message('Capturing game ', game_id)
         game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
                                  base_url ,str_extract(game_id, '\\d+')) 
-        game_tables[[game_id]] <<- game_url %>% read_html() %>% html_elements(".d25l table") %>% list() 
+        game_tables[[game_id]] <<- game_url %>% read_html() %>% as.character()
     }
     game_tables[[game_id]]
 }
@@ -179,4 +166,3 @@ if (file.exists(game_tables_file)) {
 }
 saveRDS(game_tables, file = game_tables_file)
 ```
-
