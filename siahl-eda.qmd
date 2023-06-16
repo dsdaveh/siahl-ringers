@@ -77,7 +77,7 @@ team_stats <- all_teams %>%
 
 ```{r}
 #WIP
-game_id <- 157
+game_id <- "360218*"
 g1 <- scorecards[[game_id]]
 division = g1 %>% scorecard_division()
 team = g1 %>% scorecard_teamname(home = TRUE)
@@ -87,7 +87,9 @@ h_ringers <- all_teams %>%
            ringer_count > 0  )
 xgame <- game_list[1, ] %>% 
     mutate(vg = g1 %>% scorecard_goals(home = TRUE) %>% nrow(),
-           hg = g1 %>% scorecard_goals(home = FALSE) %>% nrow())
+           hg = g1 %>% scorecard_goals(home = FALSE) %>% nrow(),
+           vg_adj = g1 %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
+           hg_adj = g1 %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow())
 g1_home <- g1 %>% scorecard_goals(home = TRUE)
 game_url <- sprintf("%soss-scoresheet?game_id=%s&mode=display", 
                                  base_url ,str_extract(game_id, '\\d+'))
