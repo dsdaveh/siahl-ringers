@@ -23,7 +23,11 @@ scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE,
                    ringer_count > 0  ) %>% 
             pull(`#`)
     }
-    list_num = ifelse(home, 2, 1)
+    scoring_xml <- box_score %>% 
+        read_html() %>% 
+        html_elements(".d25l table")
+    home_table <- ifelse(length(scoring_xml) == 2, 2, 3) #shootout contingency
+    list_num = ifelse(home, home_table, 1)
     scoring <- box_score %>% 
         read_html() %>% 
         html_elements(".d25l table")  %>% 

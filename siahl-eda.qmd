@@ -110,17 +110,32 @@ goals <- g1_home %>%
 ```
 
 ```{r}
+home_points <- function(home_goals, visitor_goals) {
+    if(home_goals == visitor_goals) return(1)
+    if(home_goals > visitor_goals) return(2)
+    return(0)
+}
 home_games <- games %>% filter(home == 1) %>% pull(Game)
-home_games <- home_games[182:200]
+#home_games <- home_games[348:1199]
+progress_count <- 0
 games_adj <- tibble()
 for (game_id in home_games) {
+    if((progess_count <- progress_count + 1) %% 100 == 0) message("...", progress_count)
     scorecard <- scorecards[[game_id]]
     game_row <- games %>% 
         filter(Game == game_id, home == 1 ) %>% 
-        mutate(v_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
-               h_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
-               vg_adj = scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
-               hg_adj = scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow())
-    games_adj <- bind_rows(games_adj, game_row)
+        mutate(h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
+               v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
+               hg_adj = scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
+               vg_adj = scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow(),
+               hdiff_adj = hg_adj - vg_adj,
+               hpts = home_points(h_goals, v_goals),
+               hpts_adj = home_points(hg_adj, vg_adj),
+               adj_effect = hpts != hpts_adj)
+    games_adj <- bind_rows(games_adj, game_row) 
 }
+```
+
+```{r}
+sum(games_adj$adj_effect)/nrow(games_adj)
 ```
