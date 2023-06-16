@@ -1,3 +1,28 @@
+#regex
+url <- "https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=373622&mode=display"
+scoring <- read_html(url) %>% 
+    html_elements(".d25l table")  %>% 
+    html_table() %>% 
+    .[[1]]
+saveRDS(scoring, file = 'test.RDS')
+scoring2 <- readRDS(file = 'test.RDS')
+identical(scoring, scoring2)
+
+#regex
+url <- "https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=373622&mode=display"
+scoring_xml <- read_html(url) %>% as.character() 
+saveRDS(scoring_xml, file = 'test.RDS')
+scoring_xml2 <- readRDS(file = 'test.RDS')
+identical(scoring_xml, scoring_xml2)
+scoring2 <- read_html(scoring_xml2) %>% 
+    html_elements(".d25l table")  %>% 
+    html_table() %>% 
+    .[[1]]
+identical(scoring, scoring2)
+
+scoring_children <- scoring_xml %>% html_children()
+
+
 # 
 url <- "https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=373622&mode=display"
 
@@ -49,7 +74,7 @@ c1.num <- suppressWarnings(c1[!is.na(as.numeric(c1))])
 
 ##
 iteam = 36
-team_name = teams$team[iteam]
+team_name = teams$Name[iteam]
 
 
 url_team <- "https://stats.sharksice.timetoscore.com/display-schedule?team=841&season=56&league=1&stat_class=1"
@@ -60,17 +85,20 @@ team_tables <- team_webpage %>%
 player_stats <- team_tables %>% .[2] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header()
 game_list <-    team_tables %>% .[1] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header()
 
-get_scoring_html <- function(url) {url %>% read_html() %>% html_elements(".d25l table") %>% list() }
+get_scoring_html_tmp <- function(url) {
+    message(url)
+    url %>% read_html() %>% html_elements(".d25l table") %>% list() 
+    }
 game_urls <- game_list %>%  
     select(Game, Home, Away) %>% 
     mutate(game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
                                  base_url ,str_extract(Game, '\\d+')),
            home = Home == team_name,
-           scoring_html = map(game_url, get_scoring_html)
+           scoring_html = map(game_url, get_scoring_html_tmp)
            )
 
 
-# scoring_html = map(game_urls$game_url[1:2], get_scoring_html)
+scoring_html = map(game_urls$game_url[1:2], get_scoring_html_tmp)
 # ss1 <- get_scoring_html(game_urls$game_url[1])
 
 for(igame in 1:nrow(game_urls)) {
@@ -81,3 +109,46 @@ for(igame in 1:nrow(game_urls)) {
 
 }
 
+game_list3 <- game_list %>% head(3)
+walk(game_list3$Game, get_scoring_html, verbose = TRUE)
+
+igame <- 1
+game_xml <- game_tables[[igame]][[1]]
+team_scoring <-    game_xml %>% get_scoring_tbl() %>% print
+
+game_list4 <- game_list %>% head(4)
+walk(game_list4$Game, get_scoring_html, verbose = TRUE)
+game_xml <- game_tables[[game_list$Game[igame]]][[1]]
+team_scoring <-    game_tables[[game_list$Game[igame]]][[1]] %>% get_scoring_tbl() %>% print
+igame <- 4
+team_scoring <-    game_tables[[game_list$Game[igame]]][[1]] %>% get_scoring_tbl() %>% print
+team_scoring <-    scorecards[[game_list$Game[igame]]][[1]] %>% get_scoring_tbl() %>% print
+saveRDS(game_tables, file = 'test_write')
+scorecards <- readRDS(file = 'test_write')
+identical(game_tables, scorecards)
+
+saveRDS(game_tables, file = 'test_write', compress = FALSE)
+scorecards <- readRDS(file = 'test_write')
+identical(game_tables, scorecards)
+
+jets1[[1]] %>% get_scoring_tbl() %>% print
+saveRDS(jets1, file = 'test_jets.RDS')
+jets1.rds <- readRDS(file = 'test_jets.RDS')
+identical(jets1, jets1.rds)
+
+xx = list(a = 1)
+saveRDS(xx, file = 'test_xx.RDS')
+xx.rds <- readRDS(file = 'test_xx.RDS')
+identical(xx, xx.rds)
+
+
+teams <- players %>% 
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>% 
+    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>% 
+    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
+           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count))
+
+
+
+
+identi

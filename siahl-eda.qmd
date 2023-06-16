@@ -62,12 +62,13 @@ ringers <- xleague_stats %>% filter(Div_spread > 2)
 Which teams have the most ringers
 
 ```{r}
-teams <- players %>% 
+all_teams <- players %>% 
     mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>% 
     left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>% 
-    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0))
+    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
+           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count))
 
-team_stats <- teams %>% 
+team_stats <- all_teams %>% 
     group_by(Team, Division, Rank) %>% 
     summarise(ringer_count = sum(ringer_count, na.rm = TRUE),
               ringer_games_count = sum(ringer_count * GP, na.rm = TRUE),
@@ -76,6 +77,22 @@ team_stats <- teams %>%
 
 ```{r}
 #WIP
-g1 <- scorecards[["373622*"]]
-g1_home <- g1[[1]] %>% get_scoring_tbl(home = TRUE)
+game_id <- 157
+g1 <- scorecards[[game_id]]
+division = g1 %>% scorecard_division()
+team = g1 %>% scorecard_teamname(home = TRUE)
+h_ringers <- all_teams %>% 
+    filter(Division == division,
+           Team == team,
+           ringer_count > 0  )
+xgame <- game_list[1, ] %>% 
+    mutate(vg = g1 %>% scorecard_goals(home = TRUE) %>% nrow(),
+           hg = g1 %>% scorecard_goals(home = FALSE) %>% nrow())
+g1_home <- g1 %>% scorecard_goals(home = TRUE)
+game_url <- sprintf("%soss-scoresheet?game_id=%s&mode=display", 
+                                 base_url ,str_extract(game_id, '\\d+'))
+goals <- g1_home %>% 
+    mutate(goal_seq = 1:n(),
+           division = g1 %>% scorecard_division(),
+           team = g1 %>% scorecard_teamname(home = TRUE))
 ```
