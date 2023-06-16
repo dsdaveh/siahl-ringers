@@ -18,7 +18,7 @@ scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE,
         division = box_score %>% scorecard_division()
         team = box_score %>% scorecard_teamname(home = home)
         ringers <- all_teams %>% 
-            filter(Division == division,
+            filter(str_detect(Division, division),
                    Team == team,
                    ringer_count > 0  ) %>% 
             pull(`#`)
@@ -41,6 +41,7 @@ scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE,
                ! ass_2 %in% ringers)
 }
 
+#scoresheet division entry is not always consistent with web site (eg. 7B vs 7B West)
 scorecard_division <- function(box_score) {
     box_score %>% 
         read_html() %>% 
@@ -49,6 +50,10 @@ scorecard_division <- function(box_score) {
         as.character() %>% 
         str_extract('Adult Division \\w+') %>%
         str_replace('Adult Division ', '')
+}
+
+game_division_lkp <- function(id) {
+    games %>% filter(Game == id) %>% pull(Division) %>% head(1)
 }
 
 scorecard_teamname <- function(box_score, home = TRUE) {
@@ -63,3 +68,4 @@ scorecard_teamname <- function(box_score, home = TRUE) {
         filter(team_name == hv_key) %>% 
         pull(team_name_2)
 }
+

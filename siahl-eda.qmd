@@ -75,16 +75,6 @@ team_stats <- all_teams %>%
               .groups = 'drop')
 ```
 
-%\>%
-
-mutate(vg = g1 %\>% scorecard_goals(home = TRUE) %\>% nrow(),
-
-hg = g1 %\>% scorecard_goals(home = FALSE) %\>% nrow(),
-
-vg_adj = g1 %\>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %\>% nrow(),
-
-hg_adj = g1 %\>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %\>% nrow())
-
 ```{r}
 #WIP
 game_id <- "360218*"
@@ -137,5 +127,16 @@ for (game_id in home_games) {
 ```
 
 ```{r}
-sum(games_adj$adj_effect)/nrow(games_adj)
+effect_by_div <- games_adj %>% 
+    group_by(Division) %>% 
+    summarize(effected = sum(adj_effect) / n(), .groups = 'drop')
+effect_by_div %>% 
+    ggplot(aes(Division, effected)) +
+    geom_col() +
+    coord_flip()
+```
+
+```{r}
+library(gt)
+effect_by_div %>% gt()
 ```
