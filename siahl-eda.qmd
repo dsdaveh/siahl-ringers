@@ -75,6 +75,16 @@ team_stats <- all_teams %>%
               .groups = 'drop')
 ```
 
+%\>%
+
+mutate(vg = g1 %\>% scorecard_goals(home = TRUE) %\>% nrow(),
+
+hg = g1 %\>% scorecard_goals(home = FALSE) %\>% nrow(),
+
+vg_adj = g1 %\>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %\>% nrow(),
+
+hg_adj = g1 %\>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %\>% nrow())
+
 ```{r}
 #WIP
 game_id <- "360218*"
@@ -97,4 +107,20 @@ goals <- g1_home %>%
     mutate(goal_seq = 1:n(),
            division = g1 %>% scorecard_division(),
            team = g1 %>% scorecard_teamname(home = TRUE))
+```
+
+```{r}
+home_games <- games %>% filter(home == 1) %>% pull(Game)
+home_games <- home_games[182:200]
+games_adj <- tibble()
+for (game_id in home_games) {
+    scorecard <- scorecards[[game_id]]
+    game_row <- games %>% 
+        filter(Game == game_id, home == 1 ) %>% 
+        mutate(v_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
+               h_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
+               vg_adj = scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
+               hg_adj = scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow())
+    games_adj <- bind_rows(games_adj, game_row)
+}
 ```
