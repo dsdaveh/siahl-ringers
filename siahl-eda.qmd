@@ -70,7 +70,7 @@ all_teams <- players %>%
 
 team_stats <- all_teams %>% 
     group_by(Team, Division, Rank) %>% 
-    summarise(ringer_count = sum(ringer_count, na.rm = TRUE),
+    summarise(ringer_count_all = sum(ringer_count, na.rm = TRUE),
               ringer_games_count = sum(ringer_count * GP, na.rm = TRUE),
               .groups = 'drop')
 ```
@@ -106,7 +106,7 @@ home_points <- function(home_goals, visitor_goals) {
     return(0)
 }
 home_games <- games %>% filter(home == 1) %>% pull(Game)
-#home_games <- home_games[348:1199]
+# home_games <- games[1412:1987, ] %>% filter(home == 1) %>% pull(Game)
 progress_count <- 0
 games_adj <- tibble()
 for (game_id in home_games) {
@@ -128,10 +128,11 @@ for (game_id in home_games) {
 
 ```{r}
 effect_by_div <- games_adj %>% 
-    group_by(Division) %>% 
+    mutate(Level = str_extract(Division, '\\d+')) %>% 
+    group_by(Level) %>% 
     summarize(effected = sum(adj_effect) / n(), .groups = 'drop')
 effect_by_div %>% 
-    ggplot(aes(Division, effected)) +
+    ggplot(aes(Level, effected)) +
     geom_col() +
     coord_flip()
 ```
