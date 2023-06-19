@@ -12,6 +12,7 @@ library(janitor)
 library(rvest)
 library(xml2)
 library(codename)
+library(randomNames)
 
 source('siahl-utils.R')
 
@@ -23,12 +24,12 @@ scorecards <- readRDS(file = 'games_tables.RDS')
 ```
 
 ```{r}
-set_seed <- codename(seed = 12)
-gen_player_codename <- function() {
-    codename(type = "gods") %>% snakecase::to_title_case() 
-}
+set.seed(12)
+player_codename_map <- players %>% select(Name) %>% unique() %>% 
+    mutate(codename = randomNames(n(), which.names = "both", sample.with.replacement = FALSE, 
+                                  name.order = "first.last", name.sep = " ")
+    )
 
-player_codename_map <- players %>% group_by(Name) %>% summarise(codename = gen_player_codename())
 players <- players %>% left_join(player_codename_map, by = 'Name')
 ```
 
