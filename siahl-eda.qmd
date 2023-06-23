@@ -21,6 +21,9 @@ players <- readRDS(file = "players_2023_winter.RDS") %>%
 games <- readRDS(file = "games_2023_winter.RDS") %>% 
     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
 scorecards <- readRDS(file = 'games_tables.RDS')
+
+
+
 ```
 
 ```{r}
@@ -68,6 +71,12 @@ xleague_stats <- players_multi %>%
 
 ```{r}
 ringers <- xleague_stats %>% filter(Div_spread > 2)
+
+all_teams <- players %>%
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>%
+    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>%
+    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
+           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count))
 ```
 
 Which teams have the most ringers
@@ -120,14 +129,163 @@ for (game_id in home_games) {
 effect_by_div <- games_adj %>% 
     mutate(Level = str_extract(Division, '\\d+')) %>% 
     group_by(Level) %>% 
-    summarize(effected = sum(adj_effect) / n(), .groups = 'drop')
+    summarize(affected = sum(adj_effect) / n(), .groups = 'drop')
 effect_by_div %>% 
-    ggplot(aes(Level, effected)) +
+    ggplot(aes(Level, affected)) +
     geom_col() +
     coord_flip()
 ```
 
 ```{r}
 library(gt)
-effect_by_div %>% gt()
+effect_by_div %>% 
+    arrange(desc(Level)) %>% 
+    gt()
+
+```
+
+Which teams had the biggest affect from Ringers
+
+```{r}
+ringer_affect <- games_adj %>% 
+    group_by(Team, Division) %>% 
+    summarise(affect_games = sum(adj_effect),
+              affect_pct = affect_games / n(),
+              .groups = 'drop') %>% 
+    filter(affect_games > 0) %>% 
+    arrange(-affect_pct)
+
+worst_offender <- ringer_affect %>% slice(1) %>% pull(Team, Division)
+worst_offender
+```
+
+```{r}
+worst_case_games <- games_adj %>% 
+    filter(Home == worst_offender | Away == worst_offender)
+worst_case_players <- players %>% 
+    filter(Team == worst_offender, Division == names(worst_offender)) %>% 
+    left_join(ringers, by = 'Name') %>% 
+    select(`#`, GP, Goals, Ass., Pts, Team, contains('Div')) %>% 
+    mutate(is_ringer = ! is.na(Div_spread)) %>% 
+    group_by(is_ringer) %>% 
+    summarise(Goals = sum(Goals),
+              Pts = sum(Pts)) %>% 
+    mutate(Goals_pct = Goals / sum(Goals),
+           Pts_pct = Pts / sum(Pts))
+    
+```
+
+```{r}
+#refactor Home/Away to Team/Opponent
+worst_case_season <- tibble()
+for (igame in 1:nrow(worst_case_games)) {
+    dfrow <- worst_case_games[igame, ]
+    if (dfrow$Home == worst_offender) {
+        scoring_cols <- dfrow %>% transmute(
+            Team = Home,
+            Opponent = Away,
+            goals_for = `Home Goals`,
+            goals_against = `Away Goals`,
+            adj_goals_for = hg_adj,
+            adj_goals_against = vg_adj )
+    } else {
+        scoring_cols <- dfrow %>% transmute(
+            Team = Away,
+            Opponent = Home,
+            goals_for = `Away Goals`,
+            goals_against = `Home Goals`,
+            adj_goals_for = vg_adj,
+            adj_goals_against = hg_adj )
+    }
+    game_refactored <- dfrow %>% 
+        select(Game, Division, adj_effect) %>% 
+        bind_cols(scoring_cols) %>% 
+        mutate(goal_diff = goals_for - goals_against,
+               adj_gdiff = adj_goals_for - adj_goals_against)
+    worst_case_season <- bind_rows(worst_case_season, 
+                                   game_refactored) 
+}
+
+home_away_nudge = 0.1
+geom_home_arrow <- function(...) {
+    geom_segment(..., aes(y = Game + home_away_nudge, yend = Game + home_away_nudge ,
+                          x = goals_for, xend = adj_goals_for),
+                 arrow = arrow(ends = "last", angle = 20))
+}
+geom_arrow <- function(...) geom_segment(..., arrow = arrow(ends = "last", angle = 20))
+
+worst_case_season %>% 
+    mutate(Game = sprintf("%s vs %s", str_extract(Game, '\\d+'), Opponent)) %>% 
+    ggplot(aes(y = Game, yend = Game, x = goal_diff)) +
+    geom_point() +
+    geom_arrow(aes(xend = adj_gdiff)) +
+    geom_vline(xintercept = 0)
+```
+
+How would the standings have changed if the adjusted scores were used
+
+\
+
+```{r}
+worst_case_league <- games_adj %>% 
+    filter(Division == names(worst_offender)) %>% 
+    mutate(vpts = 2 - hpts,
+           vpts_adj = 2 - hpts_adj) %>% 
+    select(Game, Division, Home, Away, contains('pts')) %>% 
+    pivot_longer(cols = c(Home, Away), names_to = "home_away", values_to = "Team") %>% 
+    mutate(points =     ifelse(home_away == 'Home', hpts, vpts),
+           points_adj = ifelse(home_away == 'Home', hpts_adj, vpts_adj)) %>% 
+    select(-(contains('pts')))
+
+wcl_rank_adj <- worst_case_league %>% 
+    count(Team, wt = points_adj, name = "Pts (adj)") %>% 
+    arrange(-`Pts (adj)`) %>% 
+    mutate(Rank = 1:n()) %>% 
+    rename(`Team (adj)` = Team)
+
+wcl_rank <- worst_case_league %>% 
+    count(Team, wt = points, name = "Pts") %>% 
+    arrange(-Pts) %>% 
+    mutate(Rank = 1:n()) %>% 
+    left_join(wcl_rank_adj, by = 'Rank') %>% 
+    left_join(wcl_rank_adj %>% select(`Team (adj)`, `Rank (adj)` = Rank), 
+              by = c("Team" = "Team (adj)")) %>% 
+    select(Rank, Team, Pts, `Team (adj)`, `Pts (adj)`, `Rank (adj)`) 
+    
+wcl_rank
+
+
+
+```
+
+```{r}
+wcl_rank %>% 
+    mutate(
+        color_left = case_when(
+        Rank > `Rank (adj)` ~ 'rise',
+        Rank < `Rank (adj)` ~ 'drop',
+        TRUE ~ 'same') ) %>% 
+    ggplot(aes(y = Rank, color = color_left)) +
+    geom_label(aes(label = Team), x = 1.2, hjust = "right")  +
+    geom_label(aes(label = Team, y = `Rank (adj)`), x = 2, hjust = "left") +
+    scale_y_reverse(breaks = 1:nrow(wcl_rank)) +
+    scale_color_manual(values = c("drop" = "darkred", "rise" = "skyblue", "same" = "gray")) +
+    geom_segment(aes(y = Rank, yend = `Rank (adj)`), x = 1.2, xend = 2) +
+    xlim(-0.5, 3.5) +
+    theme_minimal() +
+    theme(axis.ticks.x = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.title = element_blank(),
+        legend.position = 'none') +
+    annotate("text", x = 1.2, y = 0, label = "Rank", hjust = "right") +
+    annotate("text", x = 0, y = 0, label = "Points", hjust = "right") +
+    annotate("text", x = 2, y = 0, label = "Adjusted Rank", hjust = "left") +
+    annotate("text", x = 3.2, y = 0, label = "Points", hjust = "left") +
+    geom_text(aes(label = Pts), x = 0, color = "black", hjust = "right") +
+    geom_text(aes(label = `Pts (adj)`), x = 3.2, color = "black", hjust = "left") +
+    ggtitle("Team Standings if goals involving ringers were eliminated")
+
+    
 ```
