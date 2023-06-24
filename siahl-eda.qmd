@@ -13,6 +13,7 @@ library(rvest)
 library(xml2)
 library(codename)
 library(randomNames)
+library(scales)
 
 source('siahl-utils.R')
 
@@ -129,11 +130,16 @@ for (game_id in home_games) {
 effect_by_div <- games_adj %>% 
     mutate(Level = str_extract(Division, '\\d+')) %>% 
     group_by(Level) %>% 
-    summarize(affected = sum(adj_effect) / n(), .groups = 'drop')
-effect_by_div %>% 
+    summarize(affected = sum(adj_effect) / n(), .groups = 'drop') 
+effect_by_div_plt <- effect_by_div %>% 
     ggplot(aes(Level, affected)) +
-    geom_col() +
-    coord_flip()
+    geom_col(fill = 'skyblue') +
+    coord_flip() +
+    xlab("Division / Level") +
+    scale_y_continuous("Percentage of all Division games", labels = percent_format()) +
+    ggtitle("Percentage of games where goals involving ringers changed the outcome") +
+    theme_minimal()
+effect_by_div_plt
 ```
 
 ```{r}
@@ -206,20 +212,25 @@ for (igame in 1:nrow(worst_case_games)) {
                                    game_refactored) 
 }
 
-home_away_nudge = 0.1
-geom_home_arrow <- function(...) {
-    geom_segment(..., aes(y = Game + home_away_nudge, yend = Game + home_away_nudge ,
-                          x = goals_for, xend = adj_goals_for),
-                 arrow = arrow(ends = "last", angle = 20))
-}
 geom_arrow <- function(...) geom_segment(..., arrow = arrow(ends = "last", angle = 20))
 
-worst_case_season %>% 
+game_note <- 17
+annotate_diff <- worst_case_season %>% arrange(Game) %>% .[game_to_annotate, ]
+goal_diff_plt <- worst_case_season %>% 
     mutate(Game = sprintf("%s vs %s", str_extract(Game, '\\d+'), Opponent)) %>% 
     ggplot(aes(y = Game, yend = Game, x = goal_diff)) +
     geom_point() +
-    geom_arrow(aes(xend = adj_gdiff)) +
-    geom_vline(xintercept = 0)
+    geom_arrow(aes(xend = adj_gdiff), color = "blue") +
+    geom_vline(xintercept = 0) + 
+    theme_minimal() +
+    annotate("text", y = game_note, x = annotate_diff$goal_diff, 
+             label = " Original Goal Differential", hjust = "left", color = 'darkred') +
+    annotate("text", y = game_note, x = annotate_diff$adj_gdiff, 
+             label = " Adjusted ", hjust = "right", color = 'darkred') +
+    ggtitle("Change in goal differential when ringer influenced goals are removed",
+            subtitle = "(Arrows touching/passing through 0 indicate a change in Standings points)") +
+    xlab("")
+goal_diff_plt
 ```
 
 How would the standings have changed if the adjusted scores were used
@@ -259,7 +270,7 @@ wcl_rank
 ```
 
 ```{r}
-wcl_rank %>% 
+worst_rank_change_plt <- wcl_rank %>% 
     mutate(
         color_left = case_when(
         Rank > `Rank (adj)` ~ 'rise',
@@ -269,7 +280,7 @@ wcl_rank %>%
     geom_label(aes(label = Team), x = 1.2, hjust = "right")  +
     geom_label(aes(label = Team, y = `Rank (adj)`), x = 2, hjust = "left") +
     scale_y_reverse(breaks = 1:nrow(wcl_rank)) +
-    scale_color_manual(values = c("drop" = "darkred", "rise" = "skyblue", "same" = "gray")) +
+    scale_color_manual(values = c("drop" = "darkred", "rise" = "skyblue", "same" = "darkgrey")) +
     geom_segment(aes(y = Rank, yend = `Rank (adj)`), x = 1.2, xend = 2) +
     xlim(-0.5, 3.5) +
     theme_minimal() +
@@ -286,6 +297,6 @@ wcl_rank %>%
     geom_text(aes(label = Pts), x = 0, color = "black", hjust = "right") +
     geom_text(aes(label = `Pts (adj)`), x = 3.2, color = "black", hjust = "left") +
     ggtitle("Team Standings if goals involving ringers were eliminated")
-
+worst_rank_change_plt
     
 ```
