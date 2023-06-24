@@ -1,0 +1,27 @@
+---
+title: "SIAHL Ringers are Spoiling the Lower Leagues"
+format: html
+editor: visual
+---
+
+The Sharks Ice Adult Hockey League is unquestionably an impressive organization with around 1000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons.
+
+As a long time Sharks Ice player, I've watch the league (and it's predecessors) grow for over 30 years, and as the level of play improves, age catches up with own skills and I've had to drop levels over time in order to remain competitive. As in all recreational sports, there are some atheletes that prefer to play below their abilty, reasons can vary, but its easy to be cynical about....
+
+Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It's important for the health of the league as well, since fair play makes for a better experience for new comers, ensuring a healthy and growing increase in players.
+
+Is the ringer effect real? We can take a look at the public data available at `r base_url` which shows that effect of ringers not only has significant impact, but that impact increases drastically in the lower level of play, precisely those who are ...
+
+```{r}
+effect_by_div_plt
+```
+
+The remainder of this article explains the methodolgy behind this conclusion and dives deeper into some of the more egregious offending teams. We also suggest a simple remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team's game and league rankings.
+
+```{r}
+goal_diff_plt
+```
+
+```{r}
+worst_rank_change_plt
+```
