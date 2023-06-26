@@ -22,9 +22,6 @@ players <- readRDS(file = "players_2023_winter.RDS") %>%
 games <- readRDS(file = "games_2023_winter.RDS") %>% 
     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
 scorecards <- readRDS(file = 'games_tables.RDS')
-
-
-
 ```
 
 ```{r}
@@ -92,8 +89,9 @@ team_stats <- players %>%
     left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>% 
     mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
            ringer_count = ifelse(is.na(ringer_count), 0, ringer_count)) %>% 
-    group_by(Team, Division, Rank) %>% 
-    summarise(ringer_count_all = sum(ringer_count, na.rm = TRUE),
+    group_by(Team, Division, Rank, DivLevel) %>% 
+    summarise(n_players = n(), 
+              ringer_count_all = sum(ringer_count, na.rm = TRUE),
               ringer_games_count = sum(ringer_count * GP, na.rm = TRUE),
               .groups = 'drop') %>% 
     mutate(codename = map_chr(1:n(), gen_team_codename))
@@ -110,7 +108,7 @@ home_games <- games %>% filter(home == 1) %>% pull(Game)
 progress_count <- 0
 games_adj <- tibble()
 for (game_id in home_games) {
-    if((progess_count <- progress_count + 1) %% 100 == 0) message("...", progress_count)
+    if((progress_count <- progress_count + 1) %% 100 == 0) message("...", progress_count)
     scorecard <- scorecards[[game_id]]
     game_row <- games %>% 
         filter(Game == game_id, home == 1 ) %>% 
@@ -299,4 +297,8 @@ worst_rank_change_plt <- wcl_rank %>%
     ggtitle("Team Standings if goals involving ringers were eliminated")
 worst_rank_change_plt
     
+```
+
+```{r}
+save.image(file = 'siahl-eda.qmd.RData')
 ```
