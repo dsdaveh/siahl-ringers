@@ -2,11 +2,22 @@
 title: "SIAHL Ringers are Spoiling the Lower Leagues"
 format: html
 editor: visual
+execute:
+  echo: false
+  warning: false
+  message: false
 ---
 
-The Sharks Ice Adult Hockey League is unquestionably an impressive organization with around 1000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons.
+```{r}
+library(tidyverse)
+library(gt)
+source('siahl-utils.R')
+load('siahl-eda.qmd.RData')
+```
 
-As a long time Sharks Ice player, I've watch the league (and it's predecessors) grow for over 30 years, and as the level of play improves, age catches up with own skills and I've had to drop levels over time in order to remain competitive. As in all recreational sports, there are some atheletes that prefer to play below their abilty, reasons can vary, but its easy to be cynical about....
+The Sharks Ice Adult Hockey League is unquestionably an impressive organization with around 1000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons. A fact we'll take advantage of for this analysis.
+
+As a long time Sharks Ice player, I've watch the league (and it's predecessors) grow over the past 30+ years. As the level of play improves, age catches up with my own skills and I've had to drop levels over time in order to remain competitive. Unfortunately, its impossible to miss the fact the lower skilled divisions have a severe and increasing problem with ringers. As in all recreational sports, there are some atheletes that prefer to play below their abilty, reasons can vary, and in some cases the decision may be justified, but its important to recognize the impact this has on the lower leagues and individual players in them who are wanting to develop their own skills and engage in fair competition.
 
 Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It's important for the health of the league as well, since fair play makes for a better experience for new comers, ensuring a healthy and growing increase in players.
 
@@ -16,10 +27,95 @@ Is the ringer effect real? We can take a look at the public data available at `r
 effect_by_div_plt
 ```
 
-The remainder of this article explains the methodolgy behind this conclusion and dives deeper into some of the more egregious offending teams. We also suggest a simple remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team's game and league rankings.
+The remainder of this article explains the methodology behind this conclusion and dives deeper into some of the more egregious offending teams. We also suggest a simple remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team's game and league rankings.
+
+Let's start with some simple facts about about the league. This data represents the most recent complete season of `Winter 2023`.
+
+```{r}
+n_games <- games %>% count(Game) %>% nrow()
+n_divisions <- players %>% count(Division) %>% nrow() 
+n_players <- players %>% count(Name) %>% nrow()
+n_teams <- nrow(team_stats)
+n_multi_teamers <- nrow(multi_div)
+n_ringers <- nrow(ringers)
+```
+
+|                                                                                  |                     |
+|------------------------------------------------------|------------------|
+| Total number of games played across all divisions                                | `r n_games`         |
+| Number of Divisions                                                              | `r n_divisions`     |
+| Number of Teams                                                                  | `r n_teams`         |
+| Number of Players                                                                | `r n_players`       |
+| Number of Players who participate on multiple teams                              | `r n_multi_teamers` |
+| Number of Players who play up or down more than 2 division levels (i.e. Ringers) | `r n_ringers`       |
+
+: Winter 2023 Season
+
+Let's break that down a bit further by looking at Division/Levels. For clarity, a Division/Level looks only at the division number, for example 7A and 7B designate 2 separate divisions, but the same Division/Level. We count a ringer as any player who has played a game at least 3 Division/Levels below their highest level. The Ringer/Game Count sums the number of games each ringer has played as a ringer.
+
+```{r}
+ringer_gc_cor <- cor(team_stats$ringer_games_count, team_stats$Rank)
+team_stats %>% 
+    group_by(DivLevel) %>% 
+    summarise(`Player Count` = sum(n_players),
+              `Ringer Count` = sum(ringer_count_all),
+              `Ringer/Game Count` = sum(ringer_games_count)) %>% 
+    gt()
+    
+```
+
+There's a weak correlation (`r ringer_gc_cor |> round (3)`) between the Ringer/Game Count and the team rankings at the end of the season, which would initially imply that the ringers don't have a major impact on the season outcomes, but a more thorough look tells a different story.
+
+One way to attempt to quantify a ringer impact at the game level, is to look at scoring that involves ringers. That is, if a ringer scores or assists a goal in a game, we can remove that point from the score and compare the adjusted score to the actual final score to see if affects the outcome. To illustrate, let's look at [this Division 8A game](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display) between the `Ice Monkeys` and the `Irish Car Bombs 4` . The final score was 7-3 in favor of the `Irish` giving them a decided 2 pts towards their #1 rank for the final season.
+
+[![Irish Car Bombs 4 vs Ice Monkeys game 384789](images/siahl_game_384789.png){fig-alt="Irish Car Bombs 4 vs Ice Monkeys game 384789"}](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display)
+
+```{r}
+game_id <- '384789*'
+home_team <- games %>% filter(Game == game_id) %>% pull(Home) %>% head(1)
+away_team <- games %>% filter(Game == game_id) %>% pull(Away) %>% head(1)
+
+fix_cols <- c("Period", "Time", "empty", "Goal", "Assist1", "Assist2", "Team")
+scoring_orig <- bind_rows(
+    scorecards[['384789*']] %>% scorecard_goals(home=TRUE) %>% 
+        mutate(Team = home_team),
+    scorecards[['384789*']] %>% scorecard_goals(home=FALSE) %>% 
+        mutate(Team = away_team),
+)
+names(scoring_orig) <- fix_cols
+scoring_orig <- scoring_orig %>% select(-empty)
+
+scoring_adj <- bind_rows(
+    scorecards[['384789*']] %>% scorecard_goals(home=TRUE, remove_ringer_goals = TRUE) %>% 
+        mutate(Team = home_team),
+    scorecards[['384789*']] %>% scorecard_goals(home=FALSE, remove_ringer_goals = TRUE) %>% 
+        mutate(Team = away_team),
+)
+names(scoring_adj) <- fix_cols
+scoring_adj <- scoring_adj %>% select(-empty)
+
+ringer_tag <- scoring_adj %>% mutate(tag = 'legit') %>% select(Period, Time, tag)
+scoring <- scoring_orig %>% 
+    left_join(ringer_tag, by = c('Period', 'Time') ) %>% 
+    mutate("Ringer" = ifelse(is.na(tag), "YES", "NO")) %>% 
+    select(-tag)
+
+home_ringers <- scorecards[['384789*']] %>%  get_ringers(home = TRUE)
+away_ringers <- scorecards[['384789*']] %>%  get_ringers(home = FALSE)
+
+scoring
+
+
+```
+
+When we filter for ringers we see that each team has a few:\
+`r home_team` : `r paste(home_ringers)`
+
+`r away_team` : `r paste(away_ringers)`
 
 ```{r}
 goal_diff_plt
+
 ```
 
 ```{r}
