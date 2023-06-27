@@ -1,4 +1,7 @@
+library(tidyverse)
 library(janitor)
+library(rvest)
+library(xml2)
 
 # Define the URL
 if (! exists("base_url")) {
@@ -11,17 +14,25 @@ promote_header <- function(df) {
     df[-1, ] 
 }
 
-scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE, player_stats = players) {
+get_ringers <- function(box_score, home = TRUE, player_stats = players) {
     ringers <- numeric()
-    if (remove_ringer_goals) {
         stopifnot(exists("player_stats") && nrow(player_stats) > 0)
         division = box_score %>% scorecard_division()
         team = box_score %>% scorecard_teamname(home = home)
         ringers <- all_teams %>% 
             filter(str_detect(Division, division),
                    Team == team,
-                   ringer_count > 0  ) %>% 
-            pull(`#`)
+                   ringer_count > 0,
+                   str_length(`#`) > 0) %>% 
+            pull(`#`) %>% 
+            
+    return(ringers)
+}
+
+scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE, player_stats = players) {
+    ringers <- numeric()
+    if (remove_ringer_goals) { 
+        ringers <- get_ringers(box_score, home, player_stats)
     }
     scoring_xml <- box_score %>% 
         read_html() %>% 
