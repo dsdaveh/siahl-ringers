@@ -14,6 +14,7 @@ library(xml2)
 library(codename)
 library(randomNames)
 library(scales)
+library(gt)
 
 source('siahl-utils.R')
 
@@ -141,7 +142,6 @@ effect_by_div_plt
 ```
 
 ```{r}
-library(gt)
 effect_by_div %>% 
     arrange(desc(Level)) %>% 
     gt()
@@ -213,7 +213,7 @@ for (igame in 1:nrow(worst_case_games)) {
 geom_arrow <- function(...) geom_segment(..., arrow = arrow(ends = "last", angle = 20))
 
 game_note <- 17
-annotate_diff <- worst_case_season %>% arrange(Game) %>% .[game_to_annotate, ]
+annotate_diff <- worst_case_season %>% arrange(Game) %>% .[game_note, ]
 goal_diff_plt <- worst_case_season %>% 
     mutate(Game = sprintf("%s vs %s", str_extract(Game, '\\d+'), Opponent)) %>% 
     ggplot(aes(y = Game, yend = Game, x = goal_diff)) +
