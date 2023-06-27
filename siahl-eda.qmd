@@ -209,26 +209,26 @@ for (igame in 1:nrow(worst_case_games)) {
         bind_cols(scoring_cols) %>% 
         mutate(goal_diff = goals_for - goals_against,
                adj_gdiff = adj_goals_for - adj_goals_against,
-               `Game/ID` = sprintf("%s vs %s", str_extract(Game, '\\d+'), Opponent))
+               `Game/ID` = sprintf("vs %s / %s", Opponent, str_extract(Game, '\\d+')))
     worst_case_season <- bind_rows(worst_case_season, 
                                    game_refactored) 
 }
 
 geom_arrow <- function(...) geom_segment(..., arrow = arrow(ends = "last", angle = 20))
 
-game_note <- 12
-annotate_diff <- worst_case_season %>% arrange(Game) %>% .[game_note, ]
+game_note <- 17
+annotate_diff <- worst_case_season %>% arrange(`Game/ID`) %>% .[game_note, ]
 goal_diff_plt <- worst_case_season %>% 
     ggplot(aes(y = `Game/ID`, yend = `Game/ID`, x = goal_diff)) +
     geom_point() +
-    geom_arrow(aes(xend = adj_gdiff), color = "blue", 
-               data = filter(worst_case_season, goal_diff != adj_gdiff)) +
     geom_vline(xintercept = 0) + 
     theme_minimal() +
     annotate("text", y = game_note, x = annotate_diff$goal_diff, 
              label = " Original Goal Differential", hjust = "left", color = 'darkred') +
     annotate("text", y = game_note, x = annotate_diff$adj_gdiff, 
              label = " Adjusted ", hjust = "right", color = 'darkred') +
+        geom_arrow(aes(xend = adj_gdiff), color = "blue", 
+               data = filter(worst_case_season, goal_diff != adj_gdiff)) +
     ggtitle("Change in goal differential when ringer influenced goals are removed",
             subtitle = "(Arrows touching/passing through 0 indicate a change in Standings points)") +
     xlab("")
