@@ -127,17 +127,22 @@ scorecard_teamname <- function(box_score, home = TRUE) {
 
 # we need this to get jersey numbers
 scorecard_players <- function(box_score, home = TRUE) {
+    empty_roster <- tibble::tribble(~"#", ~"P", ~"Name")
     hv_key = ifelse(home, 11, 9)
     raw_chk <- box_score %>% 
         read_html() %>% 
         html_elements("td table") 
     if(length(raw_chk) < 11) {
-        return(tibble::tribble(~"#", ~"P", ~"Name"))  #no game stats available
+        return(empty_roster)  #no game stats available - game not played?
     }
-    raw <- raw_chk %>% 
+    raw_chk2 <- raw_chk %>% 
         .[hv_key] %>% 
         html_table() %>% 
-        .[[1]] %>% 
+        .[[1]]
+    if(ncol(raw_chk2)) {
+        return(empty_roster)  #no game stats available - home team no show?
+    }
+    raw <- raw_chk2 %>% 
         .[-1, c(1:6)] %>% 
         promote_header() 
     stopifnot(names(raw)[3] == "Name")
