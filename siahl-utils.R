@@ -48,16 +48,15 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
         filter(P != 'G') %>%  # remove goalie
         mutate(match_name = map_chr(Name, match_player_name, team_roster))
     
-    if ((un_matched <- sum(playing$match_name == FALSE)) > 0) {
+    if ((unmatched <- sum(playing$match_name == FALSE)) > 0) {
         warning("Team:", team, " Division:", division, " ", unmatched, "names on box score roster not found on team roster")
     }
     
     playing %>% 
-        filter(match_name %in% ringers) %>% 
-        pull(`#`)
+        filter(match_name %in% ringers) 
 }
 
-scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE, player_stats = players) {
+scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE, player_stats = all_teams) {
     ringers <- numeric()
     if (remove_ringer_goals) { 
         ringers <- get_ringers(box_score, home, player_stats) %>% pull(`#`)
@@ -111,9 +110,13 @@ scorecard_teamname <- function(box_score, home = TRUE) {
 # we need this to get jersey numbers
 scorecard_players <- function(box_score, home = TRUE) {
     hv_key = ifelse(home, 11, 9)
-    raw <- box_score %>% 
+    raw_chk <- box_score %>% 
         read_html() %>% 
-        html_elements("td table")  %>% 
+        html_elements("td table") 
+    if(length(raw_chk) < 11) {
+        return(tibble::tribble(~"#", ~"P", ~"Name"))  #no game stats available
+    }
+    raw <- raw_chk %>% 
         .[hv_key] %>% 
         html_table() %>% 
         .[[1]] %>% 
