@@ -14,20 +14,47 @@ promote_header <- function(df) {
     df[-1, ] 
 }
 
-get_ringers <- function(box_score, home = TRUE, player_stats = players) {
+#need this because roster from scorecard don't always match team roster names
+#scorecards have middle initials, while team rosters don't
+match_player_name <- function(name, player_stats = all_teams) {
+    #name is single character string
+    stopifnot(length(name) == 1)
+    #global variable default should be avoided for speed
+    stopifnot(exists("player_stats") && nrow(player_stats) > 0)
+    
+    first_last <- str_replace(name, ' .* ', ' ') %>% tolower()
+    match <- player_stats %>% 
+        count(Name) %>% 
+        filter(first_last == tolower(Name)) %>% 
+        pull(Name)
+    if (length(match) == 0) return (FALSE)
+    if (length(match) > 1) warning("Multiple roster name matches for ", name)
+    return(match[1])
+}
+
+get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
     stopifnot(exists("player_stats") && nrow(player_stats) > 0)
     division = box_score %>% scorecard_division()
     team = box_score %>% scorecard_teamname(home = home)
-    ringers <- all_teams %>% 
+    team_roster <- player_stats %>% 
         filter(str_detect(Division, division),
-               Team == team,
-               ringer_count > 0,
+               Team == team)
+    ringers <- team_roster %>% 
+        filter(ringer_count > 0,
                str_length(`#`) > 0) %>% 
         pull(Name) 
-    playing <- scorecard_players(box_score, home = home) %>% 
-        filter(Name %in% ringers)  
         
-    return(playing)
+    playing <- scorecard_players(box_score, home = home) %>% 
+        filter(P != 'G') %>%  # remove goalie
+        mutate(match_name = map_chr(Name, match_player_name, team_roster))
+    
+    if ((un_matched <- sum(playing$match_name == FALSE)) > 0) {
+        warning("Team:", team, " Division:", division, " ", unmatched, "names on box score roster not found on team roster")
+    }
+    
+    playing %>% 
+        filter(match_name %in% ringers) %>% 
+        pull(`#`)
 }
 
 scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE, player_stats = players) {
@@ -90,12 +117,12 @@ scorecard_players <- function(box_score, home = TRUE) {
         .[hv_key] %>% 
         html_table() %>% 
         .[[1]] %>% 
-        .[-1, c(1,3,4, 6)] %>% 
+        .[-1, c(1:6)] %>% 
         promote_header() 
-    stopifnot(names(raw)[2] == "Name")
+    stopifnot(names(raw)[3] == "Name")
     roster <- bind_rows(
-        raw[ ,1:2],
-        raw[ ,3:4]
+        raw[ ,1:3],
+        raw[ ,4:6]
     ) %>% 
-        filter(str_length(`#`) > 0)
+        filter(str_length(`#`) > 0) 
 }
