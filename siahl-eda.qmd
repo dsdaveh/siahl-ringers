@@ -233,12 +233,44 @@ goal_diff_plt <- worst_case_season %>%
              label = note_orig, hjust = "left", color = 'darkred') +
     annotate("text", y = game_note, x = annotate_diff$adj_gdiff, 
              label = note_adj, hjust = "right", color = 'darkred') +
-        geom_arrow(aes(xend = adj_gdiff), color = "blue", 
-               data = filter(worst_case_season, goal_diff != adj_gdiff)) +
+    geom_arrow(aes(xend = adj_gdiff), color = "blue", 
+               data = . %>% filter(goal_diff != adj_gdiff)) +
     ggtitle("Change in goal differential when ringer influenced goals are removed",
             subtitle = "(Arrows touching/passing through 0 indicate a change in Standings points)") +
     xlab("")
 goal_diff_plt
+```
+
+Alternate plot that was explored (abandoned since its too complex to read)
+
+```{r}
+wlt <- function(goals_for, goals_against) {
+    case_when(
+        goals_for > goals_against ~ "Win",
+        goals_for == goals_against ~ "Tie",
+        TRUE ~ "Loss"
+    )
+}
+nudge = 0.2
+worst_case_season %>% 
+    mutate(outcome = wlt(goals_for, goals_against) %>% str_extract('^.'),
+           adj_outcome = wlt(adj_goals_for, adj_goals_against) %>% str_extract('^.'),
+           `Changed Outcome` = outcome != adj_outcome) %>% 
+    ggplot(aes(y = `Game`, yend = `Game`, x = goals_for, xend = adj_goals_for)) +
+    geom_point(position = position_nudge(y = nudge)) +
+    geom_arrow(data = . %>% filter(goals_for != adj_goals_for),
+           position = position_nudge(y = nudge)) +
+    geom_point(aes(x = goals_against, color = Opponent), position = position_nudge(y = -nudge)) +
+    geom_arrow(aes(x = goals_against, xend = adj_goals_against, color = Opponent),
+               data = . %>% filter(goals_against != adj_goals_against),
+           position = position_nudge(y = -nudge)) +
+    geom_text(aes(label = outcome), hjust = "left", nudge_x = 0.1) +
+    geom_text(aes(x = adj_goals_for, label = adj_outcome), hjust = "right", nudge_x = -0.1) +
+    xlab("") +
+    ggtitle(sprintf("%s game scores adjusted - Division %s", worst_offender, names(worst_offender)),
+            subtitle = "Goals with Ringers involved removed from final score")
+    
+
 ```
 
 How would the standings have changed if the adjusted scores were used
