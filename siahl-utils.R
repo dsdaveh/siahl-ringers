@@ -27,11 +27,12 @@ match_player_name <- function(name, player_stats = all_teams) {
         count(Name) %>% 
         filter(Name == name | first_last == (tolower(Name) %>% str_squish())) %>% 
         pull(Name)
-    if (length(match) == 0) return (FALSE)
+    if (length(match) == 0) return ("<NOT_FOUND>")
     if (length(match) > 1) warning("Multiple roster name matches for ", name)
     return(match[1])
 }
 
+unmatched_players <- tibble()
 get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
     stopifnot(exists("player_stats") && nrow(player_stats) > 0)
     division = box_score %>% scorecard_division()
@@ -54,19 +55,24 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
         filter(P != 'G') %>%  # remove goalie
         mutate(match_name = map_chr(Name, match_player_name, team_roster))
     
-    if (any(playing$match_name == FALSE)) {
+    if (any(playing$match_name == "<NOT_FOUND>")) {
         unmatched = character()
-        for (ix in which(playing$match_name == FALSE)) {
+        for (ix in which(playing$match_name == "<NOT_FOUND>")) {
             match_name = match_player_name(playing$Name[ix]) #attempt match to all players
-            if (match_name != FALSE) {
+            if (match_name != "<NOT_FOUND>") {
                 playing[ix, 'match_name'] <- match_name
             } else {
                 unmatched <- c(unmatched, playing$Name[ix])
             }
         }
         if ((n_unmatched <- length(unmatched)) > 0) {
-        warning("Team:", team, " Division:", division, " ", n_unmatched, "names on box score roster not found on team roster:")
-            message( unmatched %>% paste(collapse = "\n"))
+            # warning("Team:", team, " Division:", division, " ", n_unmatched, 
+            #         " names on box score roster not found on team roster:\n")
+            # message( unmatched %>% paste(collapse = "\n"))
+            # message("game_id: ", game_id)
+            unmatched_players <<- bind_rows(
+                unmatched_players,
+                playing %>% filter(match_name == FALSE) %>% select(-match_name))
         }
     }
     
