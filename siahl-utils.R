@@ -15,24 +15,25 @@ promote_header <- function(df) {
 }
 
 get_ringers <- function(box_score, home = TRUE, player_stats = players) {
-    ringers <- numeric()
-        stopifnot(exists("player_stats") && nrow(player_stats) > 0)
-        division = box_score %>% scorecard_division()
-        team = box_score %>% scorecard_teamname(home = home)
-        ringers <- all_teams %>% 
-            filter(str_detect(Division, division),
-                   Team == team,
-                   ringer_count > 0,
-                   str_length(`#`) > 0) %>% 
-            pull(`#`) %>% 
-            
-    return(ringers)
+    stopifnot(exists("player_stats") && nrow(player_stats) > 0)
+    division = box_score %>% scorecard_division()
+    team = box_score %>% scorecard_teamname(home = home)
+    ringers <- all_teams %>% 
+        filter(str_detect(Division, division),
+               Team == team,
+               ringer_count > 0,
+               str_length(`#`) > 0) %>% 
+        pull(Name) 
+    playing <- scorecard_players(box_score, home = home) %>% 
+        filter(Name %in% ringers)  
+        
+    return(playing)
 }
 
 scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE, player_stats = players) {
     ringers <- numeric()
     if (remove_ringer_goals) { 
-        ringers <- get_ringers(box_score, home, player_stats)
+        ringers <- get_ringers(box_score, home, player_stats) %>% pull(`#`)
     }
     scoring_xml <- box_score %>% 
         read_html() %>% 
@@ -80,3 +81,21 @@ scorecard_teamname <- function(box_score, home = TRUE) {
         pull(team_name_2)
 }
 
+# we need this to get jersey numbers
+scorecard_players <- function(box_score, home = TRUE) {
+    hv_key = ifelse(home, 11, 9)
+    raw <- box_score %>% 
+        read_html() %>% 
+        html_elements("td table")  %>% 
+        .[hv_key] %>% 
+        html_table() %>% 
+        .[[1]] %>% 
+        .[-1, c(1,3,4, 6)] %>% 
+        promote_header() 
+    stopifnot(names(raw)[2] == "Name")
+    roster <- bind_rows(
+        raw[ ,1:2],
+        raw[ ,3:4]
+    ) %>% 
+        filter(str_length(`#`) > 0)
+}
