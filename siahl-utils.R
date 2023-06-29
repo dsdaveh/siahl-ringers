@@ -39,6 +39,12 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
     team_roster <- player_stats %>% 
         filter(str_detect(Division, division),
                Team == team)
+    #if division not found search without it (there shouldn't be duplicate names anyway)
+    #this can happen for interdivision games
+    if (nrow(team_roster) == 0) {
+        team_roster <- player_stats %>% filter(Team == team)
+        stopifnot(nrow(team_roster) > 0)
+    }
     ringers <- team_roster %>% 
         filter(ringer_count > 0,
                str_length(`#`) > 0) %>% 
@@ -48,8 +54,20 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
         filter(P != 'G') %>%  # remove goalie
         mutate(match_name = map_chr(Name, match_player_name, team_roster))
     
-    if ((unmatched <- sum(playing$match_name == FALSE)) > 0) {
-        warning("Team:", team, " Division:", division, " ", unmatched, "names on box score roster not found on team roster")
+    if (any(playing$match_name == FALSE)) {
+        unmatched = character()
+        for (ix in which(playing$match_name == FALSE)) {
+            match_name = match_player_name(playing$Name[ix]) #attempt match to all players
+            if (match_name != FALSE) {
+                playing[ix, 'match_name'] <- match_name
+            } else {
+                unmatched <- c(unmatched, playing$Name[ix])
+            }
+        }
+        if ((n_unmatched <- length(unmatched)) > 0) {
+        warning("Team:", team, " Division:", division, " ", unmatched, "names on box score roster not found on team roster:")
+            message( unmatched %>% paste(collapse = "\n"))
+        }
     }
     
     playing %>% 
