@@ -15,7 +15,7 @@ source('siahl-utils.R')
 load('siahl-eda.qmd.RData')
 ```
 
-The Sharks Ice Adult Hockey League is unquestionably an impressive organization with around 1000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons. A fact we'll take advantage of for this analysis.
+The Sharks Ice Adult Hockey League is unquestionably an impressive organization with nearly 2000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons. A fact we'll take advantage of for this analysis.
 
 As a long time Sharks Ice player, I've watch the league (and it's predecessors) grow over the past 30+ years. As the level of play improves, age catches up with my own skills and I've had to drop levels over time in order to remain competitive. Unfortunately, its impossible to miss the fact the lower skilled divisions have a severe and increasing problem with ringers. As in all recreational sports, there are some atheletes that prefer to play below their abilty, reasons can vary, and in some cases the decision may be justified, but its important to recognize the impact this has on the lower leagues and individual players in them who are wanting to develop their own skills and engage in fair competition.
 
