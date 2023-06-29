@@ -343,6 +343,50 @@ worst_rank_change_plt
     
 ```
 
+There a significat affect on games.
+
+Here's the percentage of goals involving ringers by division / Level
+
+```{r}
+ringer_goals_div <- games_adj %>% 
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>%
+    select(DivLevel, contains('_goals'), contains('g_adj')) %>% 
+    drop_na() %>%  #forefeits
+    group_by(DivLevel) %>% 
+    summarise(`Total Goals` = sum(h_goals + v_goals),
+              `Ringer Goals` = `Total Goals` - sum(hg_adj + vg_adj)) %>% 
+    mutate(`Ringer %` = round(100 * `Ringer Goals` / `Total Goals`, 1))
+
+ringer_goals_div_plt <- ringer_goals_div %>% 
+    ggplot(aes(DivLevel, `Ringer %`)) +
+    geom_col(fill = 'skyblue') +
+    coord_flip() +
+    theme_minimal()
+
+ringer_goals_div <- games_adj %>% 
+    mutate(DivLevel = str_extract(Division, '\\d+') ) %>%
+    select(DivLevel, contains('_goals'), contains('g_adj')) %>% 
+    drop_na() %>%  #forefeits
+    group_by(DivLevel) %>% 
+    summarise(total_goals = sum(h_goals + v_goals),
+              ringer_goals = total_goals - sum(hg_adj + vg_adj)) %>% 
+    mutate(ringer_share = ringer_goals / total_goals)
+
+ringer_goals_div_plt <- ringer_goals_div %>% 
+    ggplot(aes(DivLevel, ringer_share)) +
+    geom_col(fill = 'skyblue') +
+    coord_flip() +
+    theme_minimal() +
+    xlab("Division / Level") +
+    scale_y_continuous("Ringer Goal Percentage of all Division games", labels = percent_format()) +
+    ggtitle("Percentage of games where goals involving ringers changed the outcome") 
+    
+ringer_goals_div_plt
+
+    
+    
+```
+
 ```{r}
 save.image(file = 'siahl-eda.qmd.RData')
 ```
