@@ -72,7 +72,12 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
             # message("game_id: ", game_id)
             unmatched_players <<- bind_rows(
                 unmatched_players,
-                playing %>% filter(match_name == FALSE) %>% select(-match_name))
+                playing %>% 
+                    filter(match_name == "<NOT_FOUND>") %>% 
+                    select(-match_name) %>% 
+                    mutate(Division = division,
+                           Team = team,
+                           Game = game_id))
         }
     }
     

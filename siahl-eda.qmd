@@ -107,6 +107,8 @@ home_points <- function(home_goals, visitor_goals) {
 home_games <- games %>% filter(home == 1) %>% pull(Game)
 # home_games <- games[1412:1987, ] %>% filter(home == 1) %>% pull(Game)
 progress_count <- 0
+unmatched_players <- tibble()
+
 games_adj <- tibble()
 for (game_id in home_games) {
     if((progress_count <- progress_count + 1) %% 100 == 0) message("...", progress_count)
