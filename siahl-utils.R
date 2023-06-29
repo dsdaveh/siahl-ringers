@@ -22,10 +22,10 @@ match_player_name <- function(name, player_stats = all_teams) {
     #global variable default should be avoided for speed
     stopifnot(exists("player_stats") && nrow(player_stats) > 0)
     
-    first_last <- str_replace(name, ' .* ', ' ') %>% tolower()
+    first_last <- str_replace(name, ' .* ', ' ') %>% tolower() %>% str_squish()
     match <- player_stats %>% 
         count(Name) %>% 
-        filter(first_last == tolower(Name)) %>% 
+        filter(Name == name | first_last == (tolower(Name) %>% str_squish())) %>% 
         pull(Name)
     if (length(match) == 0) return (FALSE)
     if (length(match) > 1) warning("Multiple roster name matches for ", name)
@@ -65,7 +65,7 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
             }
         }
         if ((n_unmatched <- length(unmatched)) > 0) {
-        warning("Team:", team, " Division:", division, " ", unmatched, "names on box score roster not found on team roster:")
+        warning("Team:", team, " Division:", division, " ", n_unmatched, "names on box score roster not found on team roster:")
             message( unmatched %>% paste(collapse = "\n"))
         }
     }
