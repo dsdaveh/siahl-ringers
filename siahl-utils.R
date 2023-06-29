@@ -139,7 +139,7 @@ scorecard_players <- function(box_score, home = TRUE) {
         .[hv_key] %>% 
         html_table() %>% 
         .[[1]]
-    if(ncol(raw_chk2)) {
+    if(ncol(raw_chk2) < 6) {
         return(empty_roster)  #no game stats available - home team no show?
     }
     raw <- raw_chk2 %>% 
