@@ -398,6 +398,6 @@ ringer_goals_div_plt
 ```
 
 ```{r}
-rdata_file <- sprintf('siahl-eda-%s.qmd.RData', season)
-save.image(file = 'siahl-eda.qmd.RData')
+rdata_file <- sprintf('siahl-eda-%s.qmd.RData', season_name)
+save.image(file = rdata_file)
 ```
