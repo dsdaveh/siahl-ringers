@@ -18,9 +18,33 @@ base_url <- "https://stats.sharksice.timetoscore.com/"
 source('siahl-utils.R')
 ```
 
-Get the team division information
+Get the season list
 
 ```{r}
+url <- paste0(base_url, "display-stats.php?league=1")
+
+# Read the webpage
+webpage <- read_html(url)
+
+# Get the seasons
+season_menu <- webpage %>%
+    html_element("select") %>% 
+    html_elements("option")
+
+seasons <- tibble(
+    season_id = season_menu %>% html_attr("value"),
+    season_name = season_menu %>% html_text2()
+)
+```
+
+Get the team division information for `Winter 2023`
+
+```{r}
+season <- 'Current' # "Current" or "<Season> <Year>" eg. "Winter 2023"
+season_id <- seasons %>% filter(season_name == season) %>% pull(season_id)
+stopifnot(season_id >= 0)
+
+season_url <- 
 url <- paste0(base_url, "display-stats.php?league=1&season=56")
 
 # Read the webpage
@@ -74,7 +98,7 @@ players <- tibble()
 all_games <- tibble()
 
 # game_tables is more intensive, so we leverage existing data
-game_tables_file = "games_tables.RDS"
+game_tables_file = sprintf("games_tables-%s.RDS", season)
 if (file.exists(game_tables_file)) {
     game_tables <- readRDS(file = game_tables_file)
 } else {
@@ -148,8 +172,8 @@ for (iteam in 1:nrow(teams)) {
 Save files to disk
 
 ```{r}
-player_file = sprintf("player_stats-%s.RDS", now())
-games_file = sprintf("games_stats-%s.RDS", now())
+player_file = sprintf("player_stats-%s-%s.RDS", season, now())
+games_file = sprintf("games_stats-%s-%s.RDS", season, now())
 saveRDS(players, file = player_file)
 saveRDS(all_games, file = games_file)
 
