@@ -397,6 +397,46 @@ ringer_goals_div_plt
     
 ```
 
+It tells the same story that the 'affected games' plot tells, so I'll leave it out of the final write up.
+
+### Predictive model for scoring
+
+Let's try to build a regression model that helps illuminates the effect of being a ringer, for any player on a specific team
+
+Response = pts/game
+
+Predictors:
+
+-   Games played in season
+-   Games played on other teams
+-   Whether the player is a ringer in this league (binary)
+-   Number of player-games for team (higher team rosters in aggregate should reduce ice time, and thus scoring)
+-   Team Rank
+
+Conclusion: Effects are too small here. Abandonning for now, but leaving initial attempt below as starting point for further analysis
+
+```{r}
+pts_model_data <- all_teams %>% 
+    filter(! str_detect(tolower(Name), 'no credit')) %>% 
+    group_by(Name) %>% 
+    mutate(GP_other_teams = sum(GP) - GP,
+           PPG = Pts / GP) %>% 
+    ungroup() %>% 
+    group_by(Team, Division) %>% 
+    mutate(player_games = sum(GP)) %>% 
+    ungroup() %>% 
+    select(Name, PPG,
+           Division, DivLevel,
+           GP, GP_other_teams,
+           player_games,
+           Rank,
+           ringer_count)
+
+lm_fit <- lm(PPG ~ ., data = pts_model_data %>% select(-Name, -Division) )
+summary(lm_fit)
+
+```
+
 ```{r}
 rdata_file <- sprintf('siahl-eda-%s.qmd.RData', season_name)
 save.image(file = rdata_file)
