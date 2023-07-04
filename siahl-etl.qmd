@@ -39,13 +39,17 @@ seasons <- tibble(
 
 Get the team division information for `Winter 2023`
 
+TODO: this should be input to this file
+
 ```{r}
 season <- 'Current' # "Current" or "<Season> <Year>" eg. "Winter 2023"
 season_id <- seasons %>% filter(season_name == season) %>% pull(season_id)
 stopifnot(season_id >= 0)
+season_file <- "siahl_season_ids.RDS"
 
 season_url <- 
-url <- paste0(base_url, "display-stats.php?league=1&season=56")
+url <- sprintf("%sdisplay-stats.php?league=1&season=%s", base_url, season_id)
+
 
 # Read the webpage
 webpage <- read_html(url)
@@ -176,6 +180,7 @@ player_file = sprintf("player_stats-%s-%s.RDS", season, now())
 games_file = sprintf("games_stats-%s-%s.RDS", season, now())
 saveRDS(players, file = player_file)
 saveRDS(all_games, file = games_file)
+saveRDS(seasons, file = season_file)
 
 #backup before saving
 if (file.exists(game_tables_file)) {
