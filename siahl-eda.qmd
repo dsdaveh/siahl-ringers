@@ -23,8 +23,8 @@ source('siahl-utils.R')
 # games <- readRDS(file = "games_2023_winter.RDS") %>% 
 #     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
 # scorecards <- readRDS(file = 'games_tables.RDS')
-season_name <- "2023_winter"
-#season_name <- "Current"
+# season_name <- "2023_winter"
+season_name <- "Current"
 players_file <- sprintf("players_stats-%s.RDS", season_name)
 games_stats_file <- sprintf("games_stats-%s.RDS", season_name)
 scorecards_file <- sprintf("games_tables-%s.RDS", season_name)
@@ -123,6 +123,7 @@ games_adj <- tibble()
 for (game_id in home_games) {
     if((progress_count <- progress_count + 1) %% 100 == 0) message("...", progress_count)
     scorecard <- scorecards[[game_id]]
+    scorecard <- fix_known_scorecard_errors(scorecard, game_id)
     game_row <- games %>% 
         filter(Game == game_id, home == 1 ) %>% 
         mutate(h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),

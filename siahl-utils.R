@@ -3,6 +3,12 @@ library(janitor)
 library(rvest)
 library(xml2)
 
+#kludge for data errors
+fix_known_scorecard_errors <- function(scorecard, game_id) {
+    if (game_id == "384955*") scorecard <- str_replace_all(scorecard, "Chiefs", "Chieftains")
+    return(scorecard)
+}
+
 # Define the URL
 if (! exists("base_url")) {
     base_url <- "https://stats.sharksice.timetoscore.com/"
@@ -152,6 +158,9 @@ scorecard_players <- function(box_score, home = TRUE) {
         .[[1]]
     if(ncol(raw_chk2) < 6) {
         return(empty_roster)  #no game stats available - home team no show?
+    } 
+    if(names(raw_chk2)[3] == "Name") {
+        return(empty_roster)  #no game stats available - home visitingg no show? eg: game_id: "386666*"
     }
     raw <- raw_chk2 %>% 
         .[-1, c(1:6)] %>% 
