@@ -16,7 +16,7 @@ if (! exists("base_url")) {
 
 
 promote_header <- function(df) { 
-    names(df) <- df[1,]
+    names(df) <- df[1,] |> as.character()
     df[-1, ] 
 }
 
