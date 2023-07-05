@@ -1,0 +1,444 @@
+---
+title: "SIAHL Stats EDA"
+format: html
+editor: visual
+---
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+library(janitor)
+library(rvest)
+library(xml2)
+library(codename)
+library(randomNames)
+library(scales)
+library(gt)
+
+source('siahl-utils.R')
+
+# players <- readRDS(file = "players_2023_winter.RDS") %>% 
+#     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
+# games <- readRDS(file = "games_2023_winter.RDS") %>% 
+#     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
+# scorecards <- readRDS(file = 'games_tables.RDS')
+# season_name <- "2023_winter"
+season_name <- "Current"
+players_file <- sprintf("players_stats-%s.RDS", season_name)
+games_stats_file <- sprintf("games_stats-%s.RDS", season_name)
+scorecards_file <- sprintf("games_tables-%s.RDS", season_name)
+players <- readRDS(file = players_file) %>% 
+    mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
+games <- readRDS(file = games_stats_file) %>% 
+    mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
+scorecards <- readRDS(file = scorecards_file)
+```
+
+```{r}
+set.seed(12)
+player_codename_map <- players %>% select(Name) %>% unique() %>% 
+    mutate(codename = randomNames(n(), which.names = "both", sample.with.replacement = FALSE, 
+                                  name.order = "first.last", name.sep = " ")
+    )
+
+players <- players %>% left_join(player_codename_map, by = 'Name')
+```
+
+Players in more than one division
+
+```{r}
+multi_div <- players %>% 
+    count(Name) %>% 
+    filter(n > 1)
+
+players_multi <- multi_div %>% 
+    left_join(players, by = "Name") 
+```
+
+```{r}
+xleague_stats <- players_multi %>% 
+    mutate(PpG = Pts / GP,
+           GpG = Goals / GP,
+           DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>% 
+    group_by(Name) %>% 
+    arrange(Division) %>% 
+    summarise(n_leagues = n(),
+              best_level = min(DivLevel),
+              gp_as_ringer = sum(ifelse(DivLevel > (best_level + 2), GP, 0)),
+              # min_Goals = min(Goals),
+              # max_Goals = max(Goals),
+              # min_Pts = min(Pts),
+              # max_Pts = max(Pts),
+              min_PpG = min(PpG),
+              max_PpG = max(PpG),
+              PpG_spread = last(PpG) - first(PpG),
+              GpG_spread = last(GpG) - first(GpG),
+              Div_spread = last(DivLevel) - first(DivLevel),
+              `L/H Divs` = sprintf("%s-%s", first(Division), last(Division)) )
+```
+
+```{r}
+ringers <- xleague_stats %>% filter(Div_spread > 2)
+
+all_teams <- players %>%
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>%
+    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>%
+    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
+           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count))
+```
+
+Which teams have the most ringers
+
+```{r}
+gen_team_codename <- function(seed = 19) {
+    codename(type = "wu-tang", seed = seed) %>% str_replace("([^s])$", "\\1s")
+}
+
+team_stats <- players %>% 
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>% 
+    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>% 
+    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
+           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count)) %>% 
+    group_by(Team, Division, Rank, DivLevel) %>% 
+    summarise(n_players = n(), 
+              ringer_count_all = sum(ringer_count, na.rm = TRUE),
+              ringer_games_count = sum(ringer_count * GP, na.rm = TRUE),
+              .groups = 'drop') %>% 
+    mutate(codename = map_chr(1:n(), gen_team_codename))
+```
+
+```{r}
+home_points <- function(home_goals, visitor_goals) {
+    if(home_goals == visitor_goals) return(1)
+    if(home_goals > visitor_goals) return(2)
+    return(0)
+}
+home_games <- games %>% filter(home == 1) %>% pull(Game)
+# home_games <- games[1412:1987, ] %>% filter(home == 1) %>% pull(Game)
+progress_count <- 0
+unmatched_players <- tibble()
+
+games_adj <- tibble()
+for (game_id in home_games) {
+    if((progress_count <- progress_count + 1) %% 100 == 0) message("...", progress_count)
+    scorecard <- scorecards[[game_id]]
+    scorecard <- fix_known_scorecard_errors(scorecard, game_id)
+    game_row <- games %>% 
+        filter(Game == game_id, home == 1 ) %>% 
+        mutate(h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
+               v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
+               hg_adj = scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
+               vg_adj = scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow(),
+               hdiff_adj = hg_adj - vg_adj,
+               hpts = home_points(h_goals, v_goals),
+               hpts_adj = home_points(hg_adj, vg_adj),
+               adj_effect = hpts != hpts_adj)
+    games_adj <- bind_rows(games_adj, game_row) 
+}
+```
+
+```{r}
+effect_by_div <- games_adj %>% 
+    mutate(Level = str_extract(Division, '\\d+')) %>% 
+    group_by(Level) %>% 
+    summarize(affected = sum(adj_effect) / n(), .groups = 'drop') 
+effect_by_div_plt <- effect_by_div %>% 
+    ggplot(aes(Level, affected)) +
+    geom_col(fill = 'skyblue') +
+    coord_flip() +
+    xlab("Division / Level") +
+    scale_y_continuous("Percentage of all Division games", labels = percent_format()) +
+    ggtitle("Percentage of games where goals involving ringers changed the outcome") +
+    theme_minimal()
+effect_by_div_plt
+```
+
+```{r}
+effect_by_div %>% 
+    arrange(desc(Level)) %>% 
+    gt()
+
+```
+
+Which team had the biggest affect from Ringers
+
+```{r}
+ringer_affect <- games_adj %>% 
+    group_by(Team, Division) %>% 
+    summarise(affect_games = sum(adj_effect),
+              affect_pct = affect_games / n(),
+              .groups = 'drop') %>% 
+    filter(affect_games > 0) %>% 
+    arrange(-affect_pct)
+
+worst_offender <- ringer_affect %>% slice(1) %>% pull(Team, Division)
+worst_offender
+```
+
+Pull out the worst offenders game stats and goal percentages
+
+```{r}
+worst_case_games <- games_adj %>% 
+    filter(Home == worst_offender | Away == worst_offender)
+worst_case_players <- players %>% 
+    filter(Team == worst_offender, Division == names(worst_offender)) %>% 
+    left_join(ringers, by = 'Name') %>% 
+    select(`#`, GP, Goals, Ass., Pts, Team, contains('Div')) %>% 
+    mutate(is_ringer = ! is.na(Div_spread)) %>% 
+    group_by(is_ringer) %>% 
+    summarise(Goals = sum(Goals),
+              Pts = sum(Pts)) %>% 
+    mutate(Goals_pct = Goals / sum(Goals),
+           Pts_pct = Pts / sum(Pts))
+    
+worst_case_players
+```
+
+```{r}
+#refactor Home/Away to Team/Opponent
+worst_case_season <- tibble()
+for (igame in 1:nrow(worst_case_games)) {
+    dfrow <- worst_case_games[igame, ]
+    if (dfrow$Home == worst_offender) {
+        scoring_cols <- dfrow %>% transmute(
+            Team = Home,
+            Opponent = Away,
+            goals_for = `Home Goals`,
+            goals_against = `Away Goals`,
+            adj_goals_for = hg_adj,
+            adj_goals_against = vg_adj )
+    } else {
+        scoring_cols <- dfrow %>% transmute(
+            Team = Away,
+            Opponent = Home,
+            goals_for = `Away Goals`,
+            goals_against = `Home Goals`,
+            adj_goals_for = vg_adj,
+            adj_goals_against = hg_adj )
+    }
+    game_refactored <- dfrow %>% 
+        select(Game, Division, adj_effect) %>% 
+        bind_cols(scoring_cols) %>% 
+        mutate(goal_diff = goals_for - goals_against,
+               adj_gdiff = adj_goals_for - adj_goals_against,
+               `Game/ID` = sprintf("vs %s / %s", Opponent, str_extract(Game, '\\d+')))
+    worst_case_season <- bind_rows(worst_case_season, 
+                                   game_refactored) %>% 
+        arrange(`Game/ID`)
+}
+
+geom_arrow <- function(...) { 
+    geom_segment(..., arrow = arrow(ends = "last", type = "closed",
+                                    angle = 20, length = unit(0.1, "inches")))
+}
+
+game_note <- 17
+annotate_diff <- worst_case_season %>% arrange(`Game/ID`) %>% .[game_note, ]
+note_orig <- sprintf(" Original Goal Differential (%d-%d)", annotate_diff$goals_for, annotate_diff$goals_against)
+note_adj <- sprintf("Adjusted (%d-%d) ", annotate_diff$adj_goals_for, annotate_diff$adj_goals_against)
+goal_diff_plt <- worst_case_season %>% 
+    ggplot(aes(y = `Game/ID`, yend = `Game/ID`, x = goal_diff)) +
+    geom_point() +
+    geom_vline(xintercept = 0) + 
+    theme_minimal() +
+    annotate("text", y = game_note, x = annotate_diff$goal_diff, 
+             label = note_orig, hjust = "left", color = 'darkred') +
+    annotate("text", y = game_note, x = annotate_diff$adj_gdiff, 
+             label = note_adj, hjust = "right", color = 'darkred') +
+    geom_arrow(aes(xend = adj_gdiff), color = "blue", 
+               data = . %>% filter(goal_diff != adj_gdiff)) +
+    ggtitle("Change in goal differential when ringer influenced goals are removed",
+            subtitle = "(Arrows touching/passing through 0 indicate a change in Standings points)") +
+    xlab("")
+goal_diff_plt
+```
+
+Alternate plot that was explored (abandoned since its too complex to read)
+
+```{r}
+wlt <- function(goals_for, goals_against) {
+    case_when(
+        goals_for > goals_against ~ "Win",
+        goals_for == goals_against ~ "Tie",
+        TRUE ~ "Loss"
+    )
+}
+nudge = 0.2
+worst_case_season %>% 
+    mutate(outcome = wlt(goals_for, goals_against) %>% str_extract('^.'),
+           adj_outcome = wlt(adj_goals_for, adj_goals_against) %>% str_extract('^.'),
+           `Changed Outcome` = outcome != adj_outcome) %>% 
+    ggplot(aes(y = `Game`, yend = `Game`, x = goals_for, xend = adj_goals_for)) +
+    geom_point(position = position_nudge(y = nudge)) +
+    geom_arrow(data = . %>% filter(goals_for != adj_goals_for),
+           position = position_nudge(y = nudge)) +
+    geom_point(aes(x = goals_against, color = Opponent), position = position_nudge(y = -nudge)) +
+    geom_arrow(aes(x = goals_against, xend = adj_goals_against, color = Opponent),
+               data = . %>% filter(goals_against != adj_goals_against),
+           position = position_nudge(y = -nudge)) +
+    geom_text(aes(label = outcome), hjust = "left", nudge_x = 0.1) +
+    geom_text(aes(x = adj_goals_for, label = adj_outcome), hjust = "right", nudge_x = -0.1) +
+    xlab("") +
+    ggtitle(sprintf("%s game scores adjusted - Division %s", worst_offender, names(worst_offender)),
+            subtitle = "Goals with Ringers involved removed from final score")
+    
+
+```
+
+How would the standings have changed if the adjusted scores were used
+
+\
+
+```{r}
+worst_case_league <- games_adj %>% 
+    filter(Division == names(worst_offender)) %>% 
+    mutate(vpts = 2 - hpts,
+           vpts_adj = 2 - hpts_adj) %>% 
+    select(Game, Division, Home, Away, contains('pts')) %>% 
+    pivot_longer(cols = c(Home, Away), names_to = "home_away", values_to = "Team") %>% 
+    mutate(points =     ifelse(home_away == 'Home', hpts, vpts),
+           points_adj = ifelse(home_away == 'Home', hpts_adj, vpts_adj)) %>% 
+    select(-(contains('pts')))
+
+wcl_rank_adj <- worst_case_league %>% 
+    count(Team, wt = points_adj, name = "Pts (adj)") %>% 
+    arrange(-`Pts (adj)`) %>% 
+    mutate(Rank = 1:n()) %>% 
+    rename(`Team (adj)` = Team)
+
+wcl_rank <- worst_case_league %>% 
+    count(Team, wt = points, name = "Pts") %>% 
+    arrange(-Pts) %>% 
+    mutate(Rank = 1:n()) %>% 
+    left_join(wcl_rank_adj, by = 'Rank') %>% 
+    left_join(wcl_rank_adj %>% select(`Team (adj)`, `Rank (adj)` = Rank), 
+              by = c("Team" = "Team (adj)")) %>% 
+    select(Rank, Team, Pts, `Team (adj)`, `Pts (adj)`, `Rank (adj)`) 
+    
+wcl_rank
+
+
+
+```
+
+```{r}
+worst_rank_change_plt <- wcl_rank %>% 
+    mutate(
+        color_left = case_when(
+        Rank > `Rank (adj)` ~ 'rise',
+        Rank < `Rank (adj)` ~ 'drop',
+        TRUE ~ 'same') ) %>% 
+    ggplot(aes(y = Rank, color = color_left)) +
+    geom_label(aes(label = Team), x = 1.2, hjust = "right")  +
+    geom_label(aes(label = Team, y = `Rank (adj)`), x = 2, hjust = "left") +
+    scale_y_reverse(breaks = 1:nrow(wcl_rank)) +
+    scale_color_manual(values = c("drop" = "darkred", "rise" = "skyblue", "same" = "darkgrey")) +
+    geom_segment(aes(y = Rank, yend = `Rank (adj)`), x = 1.2, xend = 2) +
+    xlim(-0.5, 3.5) +
+    theme_minimal() +
+    theme(axis.ticks.x = element_blank(), 
+        panel.grid.major = element_blank(),
+        panel.grid.minor.x = element_blank(),
+        axis.text.x = element_blank(),
+        axis.title = element_blank(),
+        legend.position = 'none') +
+    annotate("text", x = 1.2, y = 0, label = "Rank", hjust = "right") +
+    annotate("text", x = 0, y = 0, label = "Points", hjust = "right") +
+    annotate("text", x = 2, y = 0, label = "Adjusted Rank", hjust = "left") +
+    annotate("text", x = 3.2, y = 0, label = "Points", hjust = "left") +
+    geom_text(aes(label = Pts), x = 0, color = "black", hjust = "right") +
+    geom_text(aes(label = `Pts (adj)`), x = 3.2, color = "black", hjust = "left") +
+    ggtitle("Team Standings if goals involving ringers were eliminated")
+worst_rank_change_plt
+    
+```
+
+There a significat affect on games.
+
+Here's the percentage of goals involving ringers by division / Level
+
+```{r}
+ringer_goals_div <- games_adj %>% 
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>%
+    select(DivLevel, contains('_goals'), contains('g_adj')) %>% 
+    drop_na() %>%  #forefeits
+    group_by(DivLevel) %>% 
+    summarise(`Total Goals` = sum(h_goals + v_goals),
+              `Ringer Goals` = `Total Goals` - sum(hg_adj + vg_adj)) %>% 
+    mutate(`Ringer %` = round(100 * `Ringer Goals` / `Total Goals`, 1))
+
+ringer_goals_div_plt <- ringer_goals_div %>% 
+    ggplot(aes(DivLevel, `Ringer %`)) +
+    geom_col(fill = 'skyblue') +
+    coord_flip() +
+    theme_minimal()
+
+ringer_goals_div <- games_adj %>% 
+    mutate(DivLevel = str_extract(Division, '\\d+') ) %>%
+    select(DivLevel, contains('_goals'), contains('g_adj')) %>% 
+    drop_na() %>%  #forefeits
+    group_by(DivLevel) %>% 
+    summarise(total_goals = sum(h_goals + v_goals),
+              ringer_goals = total_goals - sum(hg_adj + vg_adj)) %>% 
+    mutate(ringer_share = ringer_goals / total_goals)
+
+ringer_goals_div_plt <- ringer_goals_div %>% 
+    ggplot(aes(DivLevel, ringer_share)) +
+    geom_col(fill = 'skyblue') +
+    coord_flip() +
+    theme_minimal() +
+    xlab("Division / Level") +
+    scale_y_continuous("Ringer Goal Percentage of all Division games", labels = percent_format()) +
+    ggtitle("Percentage of games where goals involving ringers changed the outcome") 
+    
+ringer_goals_div_plt
+
+    
+    
+```
+
+It tells the same story that the 'affected games' plot tells, so I'll leave it out of the final write up.
+
+### Predictive model for scoring
+
+Let's try to build a regression model that helps illuminates the effect of being a ringer, for any player on a specific team
+
+Response = pts/game
+
+Predictors:
+
+-   Games played in season
+-   Games played on other teams
+-   Whether the player is a ringer in this league (binary)
+-   Number of player-games for team (higher team rosters in aggregate should reduce ice time, and thus scoring)
+-   Team Rank
+
+Conclusion: Effects are too small here. Abandonning for now, but leaving initial attempt below as starting point for further analysis
+
+```{r}
+pts_model_data <- all_teams %>% 
+    filter(! str_detect(tolower(Name), 'no credit')) %>% 
+    group_by(Name) %>% 
+    mutate(GP_other_teams = sum(GP) - GP,
+           PPG = Pts / GP) %>% 
+    ungroup() %>% 
+    group_by(Team, Division) %>% 
+    mutate(player_games = sum(GP)) %>% 
+    ungroup() %>% 
+    select(Name, PPG,
+           Division, DivLevel,
+           GP, GP_other_teams,
+           player_games,
+           Rank,
+           ringer_count)
+
+lm_fit <- lm(PPG ~ ., data = pts_model_data %>% select(-Name, -Division) )
+summary(lm_fit)
+
+```
+
+```{r}
+rdata_file <- sprintf('siahl-eda-%s.qmd.RData', season_name)
+save.image(file = rdata_file)
+```
