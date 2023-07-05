@@ -32,6 +32,28 @@ match_player_name <- function(name, player_stats = all_teams) {
     return(match[1])
 }
 
+identify_all_ringers <- function(game_id) {
+    if (! (exists("scorecards") && exists("all_teams"))) {
+        message("loading data from Current season...")
+        load('siahl-eda-Current.qmd.RData')
+    }
+        # TO LOAD FROM EXISTING FILE
+    # season_name <- "Current"
+    # scorecards_file <- sprintf("games_tables-%s.RDS", season_name)
+    # scorecards <- readRDS(file = scorecards_file)
+    # 
+    # 
+    if (is.null(scorecards[[game_id]])) {
+        game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
+                           base_url ,str_extract(game_id, '\\d+')) 
+        scorecard <<- game_url %>% read_html() %>% as.character()
+    } else {
+        scorecard <- scorecards[[game_id]]
+    }
+    get_ringers(scorecard)
+    
+}
+
 unmatched_players <- tibble()
 get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
     stopifnot(exists("player_stats") && nrow(player_stats) > 0)
