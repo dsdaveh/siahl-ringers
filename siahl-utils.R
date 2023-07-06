@@ -20,6 +20,42 @@ promote_header <- function(df) {
     df[-1, ] 
 }
 
+#get the ringer adjusted info for a game
+#TODO - this steps on current GlobalEnv, so should not be in this utils file.
+game_info <- function(game_id) {
+    if (! (exists("scorecards") && exists("all_teams"))) {
+        message("loading data from Current season...")
+        load('siahl-eda-Current.qmd.RData', .GlobalEnv)
+    }
+    # test with game_info("387361*")
+    # 
+    # 
+    if (is.null(scorecards[[game_id]])) {
+        game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
+                           base_url ,str_extract(game_id, '\\d+')) 
+        scorecard <<- game_url %>% read_html() %>% as.character()
+    } else {
+        scorecard <- scorecards[[game_id]]
+    }
+    
+    #return
+    list(
+    h_team = scorecard %>% scorecard_teamname(home = TRUE),
+    v_team = scorecard %>% scorecard_teamname(home = FALSE),
+    
+    h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
+    v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
+    hg_adj = scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
+    vg_adj = scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow(),
+    hdiff_adj = hg_adj - vg_adj,
+    
+    
+    ringers = bind_rows(
+        get_ringers(scorecard, home = TRUE) %>% mutate(Home = TRUE),
+        get_ringers(scorecard, home = FALSE) %>% mutate(Home = FALSE))
+    )
+}
+
 #need this because roster from scorecard don't always match team roster names
 #scorecards have middle initials, while team rosters don't
 match_player_name <- function(name, player_stats = all_teams) {
