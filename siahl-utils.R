@@ -208,3 +208,65 @@ scorecard_players <- function(box_score, home = TRUE) {
     ) %>% 
         filter(str_length(`#`) > 0) 
 }
+
+get_season_teams <- function(sid, verbose = 1) {
+    season_row <- seasons %>% filter(season_id == sid)
+    stopifnot(nrow(season_row) == 1)
+    season_name <- ifelse(season_row$season_name == 'Current', 
+                          season_current, season_row$season_name)
+    season_url <- 
+        url <- sprintf("%sdisplay-stats.php?league=1&season=%s", base_url, sid)
+    if (verbose >= 1) message("getting teams for season ", sid, ":", season_name, "...")
+    
+    
+    # Read the webpage
+    webpage <- read_html(url)
+   
+    # Initialize an empty tibble for storing results
+    teams <- tibble()
+    
+    # Scrape the Adult Division names and team rows
+    table_rows <- webpage %>%
+        html_elements("tr") 
+    
+    if (length(table_rows) <= 0) {
+        warning("No tables returned for season ", sid, ":", season_name, "\n")
+        return(teams)
+    }    
+    
+    
+    # Initialize a variable to store the current division
+    current_division <- ""
+    
+    # Loop over each table row
+    for (i in 1:length(table_rows)) {
+        # Get the row
+        row <- table_rows[[i]]
+        team_extract <- row %>% html_elements("td a") %>%  html_text(trim = TRUE)
+        
+        # Check if it's a division row
+        if (row %>% html_text() %>% str_detect("Adult Division")) {
+            current_division <- row %>% html_text()
+            rank <- 1
+            # Check if it's a team row
+        } else if (length(team_extract) > 0) {
+            team_name <- row %>% html_elements("td a") %>%  html_text(trim = TRUE)
+            team_stats <- paste0(base_url, row %>% html_elements("td a") %>%  html_attr("href"))
+            
+            team_data <- tibble(
+                team = team_name,
+                team_id = team_stats %>%  str_extract('\\?team=\\d+') %>% str_extract('\\d+'),
+                team_stats = team_stats,
+                division = current_division %>% str_replace('Adult Division ', ''),
+                division_rank = rank
+            )
+            rank = rank + 1
+            
+            # Append the team data to final_data
+            teams <- bind_rows(teams, team_data) 
+        }
+    }
+    teams%>% 
+        mutate(season_id = sid,
+               season_name = season_name)
+}
