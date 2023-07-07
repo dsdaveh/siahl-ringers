@@ -111,6 +111,7 @@ if (file.exists(game_tables_file)) {
 
 #game_tables is a global lookup
 get_scoring_html <- function(game_id, verbose = TRUE) {
+    if (! str_detect(game_id, '\\*$')) return() # skip if game isn't complete 
     if (is.null(game_tables[[game_id]])) {
         if (verbose) message('Capturing game ', game_id)
         game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
@@ -161,10 +162,6 @@ for (iteam in 1:nrow(teams)) {
     ) 
     all_games <- bind_rows(all_games, games)
     
-    
-    
-
-  
   # Append the table to final_data
   players <- bind_rows(players, player_stats)
 
