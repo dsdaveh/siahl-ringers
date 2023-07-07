@@ -54,7 +54,8 @@ seasons_numbered_era <- seasons %>%
 teams <- map_dfr(seasons_numbered_era$season_id, get_season_teams)
 
 warning("TODO: save this properly")
-saveRDS(teams, 'teams-all_seasons.RDS')
+# saveRDS(teams, 'teams-all_seasons.RDS')
+# teams <- readRDS(file = 'teams-all_seasons.RDS')
 ```
 
 Scrape Game and Player info (loop over teams)
@@ -71,7 +72,7 @@ if (file.exists(player_file)) {
 
 # Loop over each team URL
 t0 <- Sys.time()
-start_at <- 785
+start_at <- 1 #use this for restarts
 for (iteam in start_at:nrow(teams)) {
     message(sprintf("scraping player history for %s in %s (%d/%d) @ %s... ", 
         teams$team[iteam], teams$division[iteam], iteam, nrow(teams),
@@ -81,6 +82,7 @@ for (iteam in start_at:nrow(teams)) {
     team_webpage <- read_html(teams$team_stats[iteam])
     
     team_tables <- team_webpage %>% html_nodes("table")
+    if (length(team_tables) < 2) next     # catch corner case: eg. display-schedule?team=2711&season=48&league=1&stat_class=1
     roster_table <- team_tables %>% .[2] %>% html_elements('td a') 
     roster_urls <- tibble(Name = roster_table %>% html_text2(),
                           player_url = roster_table %>% html_attr('href'))
@@ -91,8 +93,10 @@ for (iteam in start_at:nrow(teams)) {
             known_players <- suppressWarnings(players$player_url %>% unique)
             if (player_row$player_url %in% known_players) next
             player_url <- sprintf("%s%s", base_url, player_row$player_url)
-            player_teams <- read_html(player_url) %>% 
-                html_element('#playerstattable') %>% 
+            player_table <- read_html(player_url) %>% 
+                html_element('#playerstattable') 
+                if (length(player_table) <= 0) next #corner case : eg display-player-stats.php?player=59562
+            player_teams <- player_table %>% 
                 html_table() %>% 
                 promote_header() %>% 
                 mutate(Name = player_row$Name,
