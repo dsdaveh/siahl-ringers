@@ -37,23 +37,27 @@ game_info <- function(game_id) {
     } else {
         scorecard <- scorecards[[game_id]]
     }
-    
+
     #return
-    list(
+    hg_adj <- scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow()
+    vg_adj <- scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow()
+    
+    info <- list(
     h_team = scorecard %>% scorecard_teamname(home = TRUE),
     v_team = scorecard %>% scorecard_teamname(home = FALSE),
     
     h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
     v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
-    hg_adj = scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
-    vg_adj = scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow(),
+    hg_adj = hg_adj,
+    vg_adj = vg_adj,
     hdiff_adj = hg_adj - vg_adj,
-    
-    
+
+
     ringers = bind_rows(
         get_ringers(scorecard, home = TRUE) %>% mutate(Home = TRUE),
         get_ringers(scorecard, home = FALSE) %>% mutate(Home = FALSE))
     )
+    return(info)
 }
 
 #need this because roster from scorecard don't always match team roster names
