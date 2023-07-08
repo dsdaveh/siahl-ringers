@@ -25,7 +25,9 @@ promote_header <- function(df) {
 game_info <- function(game_id) {
     if (! (exists("scorecards") && exists("all_teams"))) {
         message("loading data from Current season...")
-        load('siahl-eda-Current.qmd.RData', .GlobalEnv)
+        rdata_file <- 'siahl-eda-Current.qmd.RData'
+        load(rdata_file, .GlobalEnv)
+        mtime <- file.mtime(rdata_file)
     }
     # test with game_info("387361*")
     # 
@@ -34,28 +36,37 @@ game_info <- function(game_id) {
         game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
                            base_url ,str_extract(game_id, '\\d+')) 
         scorecard <<- game_url %>% read_html() %>% as.character()
+        update_time <- now()
     } else {
         scorecard <- scorecards[[game_id]]
+        update_time <- ifelse(exists('mtime'), mtime, NA_POSIXct_) %>% as.POSIXct()
     }
 
     #return
     hg_adj <- scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow()
     vg_adj <- scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow()
+    h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow()
+    v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow()
     
+    print(class(update_time))
     info <- list(
-    h_team = scorecard %>% scorecard_teamname(home = TRUE),
-    v_team = scorecard %>% scorecard_teamname(home = FALSE),
-    
-    h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
-    v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
-    hg_adj = hg_adj,
-    vg_adj = vg_adj,
-    hdiff_adj = hg_adj - vg_adj,
-
-
-    ringers = bind_rows(
-        get_ringers(scorecard, home = TRUE) %>% mutate(Home = TRUE),
-        get_ringers(scorecard, home = FALSE) %>% mutate(Home = FALSE))
+        game_id = game_id,
+        update_time = update_time,
+        start_time = scorecard %>% scorecard_game_time(),
+        division = paste("SIAHL@SJ Division", scorecard %>% scorecard_division(), collapse = " "),
+        h_team = scorecard %>% scorecard_teamname(home = TRUE),
+        v_team = scorecard %>% scorecard_teamname(home = FALSE),
+        
+        h_goals = h_goals,
+        v_goals = v_goals,
+        hg_adj = hg_adj,
+        vg_adj = vg_adj,
+        hdiff = h_goals - v_goals,
+        hdiff_adj = hg_adj - vg_adj,
+        
+        ringers = bind_rows(
+            get_ringers(scorecard, home = TRUE) %>% mutate(Home = TRUE),
+            get_ringers(scorecard, home = FALSE) %>% mutate(Home = FALSE))
     )
     return(info)
 }
@@ -165,6 +176,27 @@ scorecard_division <- function(box_score) {
         str_replace('Adult Division ', '')
 }
 
+
+scorecard_game_time <- function(box_score) {
+    meta <- box_score %>% scorecard_meta()
+    paste(meta['Date'], meta['Time'], collapse = "") %>% 
+        lubridate::mdy_hm(tz = "America/Los_Angeles")
+}
+
+# a more comprehensive extraction... that other scorecard_... extractions can use
+scorecard_meta <- function(box_score) {
+    meta <- box_score %>% 
+        read_html() %>% 
+        html_elements("td")  %>% 
+        html_text2() %>% 
+        .[str_detect(., '^\\w+:')] %>%   # finds 'Key:Value ...'
+        .[! str_detect(., '\\t')]       # remove multiple Key:Value
+    keys <- meta %>% str_extract('.*?:') %>% str_replace(':', '') 
+    vals <- meta %>% str_extract(":.*") %>% str_replace('^:', '')
+    names(vals) <- keys
+    return(vals)
+}
+
 game_division_lkp <- function(id) {
     games %>% filter(Game == id) %>% pull(Division) %>% head(1)
 }
@@ -212,6 +244,7 @@ scorecard_players <- function(box_score, home = TRUE) {
     ) %>% 
         filter(str_length(`#`) > 0) 
 }
+
 
 get_season_teams <- function(sid, verbose = 1) {
     season_row <- seasons %>% filter(season_id == sid)
