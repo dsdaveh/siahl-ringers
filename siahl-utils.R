@@ -82,9 +82,9 @@ game_info <- function(game_id) {
         hdiff = h_goals - v_goals,
         hdiff_adj = hg_adj - vg_adj,
         
-        ringers = bind_rows(
-            get_ringers(scorecard, home = TRUE) %>% mutate(Home = TRUE),
-            get_ringers(scorecard, home = FALSE) %>% mutate(Home = FALSE))
+        h_ringers = scorecard %>% get_ringers(home = TRUE) %>% select(`#`, Name),
+        v_ringers = scorecard %>% get_ringers(home = FALSE) %>% select(`#`, Name)
+  
     )
     return(info)
 }

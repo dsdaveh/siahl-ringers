@@ -24,6 +24,11 @@ f7Page(
                 f7Col(uiOutput("away_team_adj_info"), width = 5),
                 f7Col(uiOutput("home_team_adj_info"), width = 5)
             ),
+            f7Row(
+                f7Col(width = 2),
+                f7Col(DTOutput("away_team_ringers"), width = 5),
+                f7Col(DTOutput("home_team_ringers"), width = 5)
+            ),
             verbatimTextOutput("update_time")
         )
     )

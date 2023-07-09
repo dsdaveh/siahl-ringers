@@ -85,4 +85,14 @@ shinyServer(function(input, output) {
         req(game_data())
         paste("Last update:", game_data()$update_time)
     })
+    
+    output$away_team_ringers <- renderDT({
+        req(game_data())
+        datatable(game_data()$v_ringers)
+    })
+    
+    output$home_team_ringers <- renderDT({
+        req(game_data())
+        datatable(game_data()$h_ringers)
+    })
 })
