@@ -3,9 +3,13 @@ library(shinyMobile)
 library(gt)
 
 f7Page(
-    title = "Hockey Game Info",
+    title = "Hockey Game Ringer Effects",
+    options = list(
+        theme = "ios",
+        dark = FALSE,
+        color = "teal"),
     f7SingleLayout(
-        navbar = f7Navbar(title = "Hockey Game Info", color = "blue"),
+        navbar = f7Navbar(title = "Hockey Game Ringer Effects", color = "blue"),
         f7Card(
             f7Row(
                 f7Col(
