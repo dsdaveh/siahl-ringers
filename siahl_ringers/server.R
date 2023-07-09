@@ -8,12 +8,14 @@ source('../siahl-utils.R')
 shinyServer(function(input, output) {
     game_data <- reactive({
         req(input$submit_btn)
+message("game_data", input$game_id)
         
         isolate({
             game_id <- input$game_id
+message(class(game_id))
             
             # Get the game info
-            game_info <- get_info(game_id)
+            game_info <- game_info(game_id)
             
             # Create a dataframe to be displayed as a table
             df <- data.frame(

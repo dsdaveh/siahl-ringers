@@ -22,6 +22,24 @@ promote_header <- function(df) {
 
 #get the ringer adjusted info for a game
 #TODO - this steps on current GlobalEnv, so should not be in this utils file.
+
+check_valid_game_id <- function(game_id) {
+    #web site returns a scoreboard for virtually any game_id,
+    # check that the data is within the scope expected
+    game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
+                       base_url ,str_extract(game_id, '\\d+')) 
+    box_score <- game_url %>% read_html() %>% as.character()
+    
+    # *SOME* game_ids return nothing
+    td_check <- box_score %>% read_html() %>% html_elements("td")
+    if (length(td_check) == 0) return(FALSE)
+    
+    meta <- box_score %>% scorecard_meta() 
+    if (meta["League"] != "SIAHL@SJ") return(FALSE) #return early so next line doesn't fail
+    game_date <- box_score %>% scorecard_game_time()
+    return(game_date > ymd('2016-01-01'))
+}
+
 game_info <- function(game_id) {
     if (! (exists("scorecards") && exists("all_teams"))) {
         message("loading data from Current season...")
@@ -35,7 +53,7 @@ game_info <- function(game_id) {
     if (is.null(scorecards[[game_id]])) {
         game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
                            base_url ,str_extract(game_id, '\\d+')) 
-        scorecard <<- game_url %>% read_html() %>% as.character()
+        scorecard <- game_url %>% read_html() %>% as.character()
         update_time <- now()
     } else {
         scorecard <- scorecards[[game_id]]
