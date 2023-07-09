@@ -34,7 +34,7 @@ shinyServer(function(input, output) {
             div(style = paste0("color: white; background-color: ", 
                                if(game_data()$v_goals > game_data()$h_goals) {"green"} 
                                else if(game_data()$v_goals < game_data()$h_goals) {"red"} 
-                               else {"orange"}, "; padding: 5px; display: inline-block;"), "Score: ", game_data()$v_goals)
+                               else {"orange"}, "; padding: 5px; display: inline-block;"), game_data()$v_goals)
         )
     })
     
@@ -46,7 +46,15 @@ shinyServer(function(input, output) {
             div(style = paste0("color: white; background-color: ", 
                                if(game_data()$h_goals > game_data()$v_goals) {"green"} 
                                else if(game_data()$h_goals < game_data()$v_goals) {"red"} 
-                               else {"orange"}, "; padding: 5px; display: inline-block;"), "Score: ", game_data()$h_goals)
+                               else {"orange"}, "; padding: 5px; display: inline-block;"), game_data()$h_goals)
+        )
+    })
+    
+    output$score_label <- renderUI({
+        tagList(
+            h4(" "),
+            h5(" "),
+            h6("Score")
         )
     })
     

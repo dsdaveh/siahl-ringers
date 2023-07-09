@@ -15,9 +15,9 @@ f7Page(
                 )
             ),
             f7Row(
-                f7Col(width = 4),
-                f7Col(uiOutput("away_team_info"), width = 4),
-                f7Col(uiOutput("home_team_info"), width = 4)
+                f7Col(uiOutput("score_label"), width = 2),
+                f7Col(uiOutput("away_team_info"), width = 5),
+                f7Col(uiOutput("home_team_info"), width = 5)
             ),
             verbatimTextOutput("update_time")
         )
