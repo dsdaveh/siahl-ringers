@@ -9,7 +9,7 @@ shinyUI(f7Page(
                           color = "blue"),
         f7Card(
             f7Text(inputId = "game_id", label = "Enter game ID", placeholder = "Enter game ID here"),
-            actionButton(inputId = "submit_btn", label = "Submit")
+            f7Button(inputId = "submit_btn", label = "Submit", color = "blue")
         ),
         f7Card(
             DTOutput('hockey_info')
