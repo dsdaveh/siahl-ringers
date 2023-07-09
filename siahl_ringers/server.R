@@ -1,3 +1,4 @@
+# server.R
 library(shiny)
 library(shinyMobile)
 
@@ -28,22 +29,24 @@ shinyServer(function(input, output) {
     output$away_team_info <- renderUI({
         req(game_data())
         tagList(
-            h4("Away Team: ", game_data()$v_team),
+            h4("Away"),
+            h5(game_data()$v_team),
             div(style = paste0("color: white; background-color: ", 
                                if(game_data()$v_goals > game_data()$h_goals) {"green"} 
                                else if(game_data()$v_goals < game_data()$h_goals) {"red"} 
-                               else {"orange"}, "; padding: 5px;"), game_data()$v_goals)
+                               else {"orange"}, "; padding: 5px; display: inline-block;"), "Score: ", game_data()$v_goals)
         )
     })
     
     output$home_team_info <- renderUI({
         req(game_data())
         tagList(
-            h4("Home Team: ", game_data()$h_team),
+            h4("Home"),
+            h5(game_data()$h_team),
             div(style = paste0("color: white; background-color: ", 
                                if(game_data()$h_goals > game_data()$v_goals) {"green"} 
                                else if(game_data()$h_goals < game_data()$v_goals) {"red"} 
-                               else {"orange"}, "; padding: 5px;"), game_data()$h_goals)
+                               else {"orange"}, "; padding: 5px; display: inline-block;"), "Score: ", game_data()$h_goals)
         )
     })
     
