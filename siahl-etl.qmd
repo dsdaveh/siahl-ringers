@@ -140,6 +140,9 @@ for (iteam in 1:nrow(teams)) {
     game_cols[fix_cols[2]] <- 'Home Goals'
     names(game_list) <- game_cols
     
+    game_list <- game_list %>% 
+        filter(str_detect(Game, "\\*$")) ## remove future and in progress games
+    
     player_stats <- player_stats %>% 
         mutate(across(3:ncol(.), as.numeric)) %>% 
         mutate(Team = teams$team[iteam], 
@@ -165,7 +168,6 @@ for (iteam in 1:nrow(teams)) {
   # Append the table to final_data
   players <- bind_rows(players, player_stats)
 
-  Sys.sleep(1)
 }
 
 ```

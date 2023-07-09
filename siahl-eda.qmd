@@ -19,7 +19,7 @@ library(gt)
 source('siahl-utils.R')
 
 season_name <- "Current"
-players_file <- sprintf("players_stats-%s.RDS", season_name)
+players_file <- sprintf("player_stats-%s.RDS", season_name)
 games_stats_file <- sprintf("games_stats-%s.RDS", season_name)
 scorecards_file <- sprintf("games_tables-%s.RDS", season_name)
 players <- readRDS(file = players_file) %>% 

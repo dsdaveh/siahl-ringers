@@ -14,7 +14,6 @@ if (! exists("base_url")) {
     base_url <- "https://stats.sharksice.timetoscore.com/"
 }
 
-
 promote_header <- function(df) { 
     names(df) <- df[1,] |> as.character()
     df[-1, ] 
@@ -40,12 +39,14 @@ check_valid_game_id <- function(game_id) {
     return(game_date > ymd('2016-01-01'))
 }
 
+mtime <- NA_POSIXct_
 game_info <- function(game_id) {
     if (! (exists("scorecards") && exists("all_teams"))) {
         message("loading data from Current season...")
-        scorecards_file <- "games_tables-Current.RDS"
-        scorecards <- readRDS(file = scorecards_file)
-        mtime <- file.mtime(scorecards_file)
+        rdata_file <- "siahl-eda-Current.qmd.RData"
+        load(rdata_file, .GlobalEnv)
+        
+        mtime <<- file.mtime(rdata_file)
     }
     # test with game_info("387361*")
     # 
