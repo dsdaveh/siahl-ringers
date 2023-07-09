@@ -156,8 +156,13 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
         }
     }
     
-    playing %>% 
+    ringers_playing <- playing %>% 
         filter(match_name %in% ringers) 
+    if (nrow(ringers_playing) == 0) {
+        ringers_playing <- ringers_playing %>% 
+            bind_rows( tibble(Name = "<No ringers>"))
+    }
+    return(ringers_playing)
 }
 
 scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE, player_stats = all_teams) {

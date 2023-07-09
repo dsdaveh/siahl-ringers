@@ -1,6 +1,7 @@
 # ui.R
 library(shiny)
 library(shinyMobile)
+library(gt)
 
 f7Page(
     title = "Hockey Game Info",
@@ -26,8 +27,8 @@ f7Page(
             ),
             f7Row(
                 f7Col(width = 2),
-                f7Col(DTOutput("away_team_ringers"), width = 5),
-                f7Col(DTOutput("home_team_ringers"), width = 5)
+                f7Col(htmlOutput("away_team_ringers"), width = 5),
+                f7Col(htmlOutput("home_team_ringers"), width = 5)
             ),
             verbatimTextOutput("update_time")
         )

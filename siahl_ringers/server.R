@@ -1,6 +1,7 @@
 # server.R
 library(shiny)
 library(shinyMobile)
+library(gt)
 
 source('../siahl-utils.R')
 
@@ -86,13 +87,18 @@ shinyServer(function(input, output) {
         paste("Last update:", game_data()$update_time)
     })
     
-    output$away_team_ringers <- renderDT({
+    output$away_team_ringers <- renderUI({
         req(game_data())
-        datatable(game_data()$v_ringers)
+        gt::gt(game_data()$v_ringers) %>% 
+            gt::as_raw_html()
     })
     
-    output$home_team_ringers <- renderDT({
+    output$home_team_ringers <- renderUI({
         req(game_data())
-        datatable(game_data()$h_ringers)
+        gt::gt(game_data()$h_ringers) %>% 
+            gt::as_raw_html()
     })
+    
+
+    
 })
