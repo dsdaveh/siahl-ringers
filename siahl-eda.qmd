@@ -18,12 +18,6 @@ library(gt)
 
 source('siahl-utils.R')
 
-# players <- readRDS(file = "players_2023_winter.RDS") %>% 
-#     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
-# games <- readRDS(file = "games_2023_winter.RDS") %>% 
-#     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
-# scorecards <- readRDS(file = 'games_tables.RDS')
-# season_name <- "2023_winter"
 season_name <- "Current"
 players_file <- sprintf("players_stats-%s.RDS", season_name)
 games_stats_file <- sprintf("games_stats-%s.RDS", season_name)
