@@ -51,11 +51,8 @@ shinyServer(function(input, output) {
     })
     
     output$score_label <- renderUI({
-        tagList(
-            h4(" "),
-            h5(" "),
-            h6("Score")
-        )
+        req(game_data())
+        h6("Score", align = "right")
     })
     
     # Display the update time
