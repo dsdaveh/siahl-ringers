@@ -50,9 +50,34 @@ shinyServer(function(input, output) {
         )
     })
     
+    output$away_team_adj_info <- renderUI({
+        req(game_data())
+        tagList(
+            div(style = paste0("color: white; background-color: ", 
+                               if(game_data()$vg_adj > game_data()$hg_adj) {"green"} 
+                               else if(game_data()$vg_adj < game_data()$hg_adj) {"red"} 
+                               else {"orange"}, "; padding: 5px; display: inline-block;"), game_data()$vg_adj)
+        )
+    })
+    
+    output$home_team_adj_info <- renderUI({
+        req(game_data())
+        tagList(
+            div(style = paste0("color: white; background-color: ", 
+                               if(game_data()$hg_adj > game_data()$vg_adj) {"green"} 
+                               else if(game_data()$hg_adj < game_data()$vg_adj) {"red"} 
+                               else {"orange"}, "; padding: 5px; display: inline-block;"), game_data()$hg_adj)
+        )
+    })
+    
     output$score_label <- renderUI({
         req(game_data())
         h6("Score", align = "right")
+    })
+    
+    output$adjusted_label <- renderUI({
+        req(game_data())
+        h6("Adjusted*", align = "right")
     })
     
     # Display the update time
