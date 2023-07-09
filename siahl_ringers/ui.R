@@ -7,6 +7,8 @@ shinyUI(f7Page(
     f7SingleLayout(
         navbar = f7Navbar(title = "Hockey Game Info",
                           color = "blue"),
+        uiOutput("preloader"),
+        
         f7Card(
             f7Text(inputId = "game_id", label = "Enter game ID", placeholder = "Enter game ID here"),
             f7Button(inputId = "submit_btn", label = "Submit", color = "blue")

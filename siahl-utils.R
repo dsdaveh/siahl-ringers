@@ -66,7 +66,6 @@ game_info <- function(game_id) {
     h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow()
     v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow()
     
-    print(class(update_time))
     info <- list(
         game_id = game_id,
         update_time = update_time,
