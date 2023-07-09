@@ -87,18 +87,18 @@ shinyServer(function(input, output) {
         paste("Last update:", game_data()$update_time)
     })
     
-    output$away_team_ringers <- renderUI({
+    output$ringers_label <- renderUI({
         req(game_data())
-        gt::gt(game_data()$v_ringers) %>% 
-            gt::as_raw_html()
+        tags$p("Ringers", style = "text-align:right")
     })
     
-    output$home_team_ringers <- renderUI({
+    output$away_team_ringers <- gt::render_gt({
         req(game_data())
-        gt::gt(game_data()$h_ringers) %>% 
-            gt::as_raw_html()
+        gt(game_data()$v_ringers)
     })
     
-
-    
+    output$home_team_ringers <- gt::render_gt({
+        req(game_data())
+        gt(game_data()$h_ringers)
+    })
 })

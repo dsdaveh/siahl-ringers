@@ -26,9 +26,9 @@ f7Page(
                 f7Col(uiOutput("home_team_adj_info"), width = 5)
             ),
             f7Row(
-                f7Col(width = 2),
-                f7Col(htmlOutput("away_team_ringers"), width = 5),
-                f7Col(htmlOutput("home_team_ringers"), width = 5)
+                f7Col(uiOutput("ringers_label"), width = 2),
+                f7Col(gt::gt_output("away_team_ringers"), width = 5),
+                f7Col(gt::gt_output("home_team_ringers"), width = 5)
             ),
             verbatimTextOutput("update_time")
         )
