@@ -101,4 +101,16 @@ shinyServer(function(input, output) {
         req(game_data())
         gt(game_data()$h_ringers)
     })
+    
+    output$scoring_label <- renderUI({
+        req(game_data())
+        tags$p("Scoring", style = "text-align:right")
+    })
+    
+    output$scoring <- gt::render_gt({
+        req(game_data())
+        gt(game_data()$scoring)
+    })
+    
+    
 })

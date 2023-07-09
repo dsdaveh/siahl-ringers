@@ -83,10 +83,35 @@ game_info <- function(game_id) {
         hdiff_adj = hg_adj - vg_adj,
         
         h_ringers = scorecard %>% get_ringers(home = TRUE) %>% select(`#`, Name),
-        v_ringers = scorecard %>% get_ringers(home = FALSE) %>% select(`#`, Name)
+        v_ringers = scorecard %>% get_ringers(home = FALSE) %>% select(`#`, Name),
+        
+        scoring = scorecard %>% construct_scoring_table()
   
     )
     return(info)
+}
+
+construct_scoring_table <- function(box_score) {
+    h_scores <- box_score %>% scorecard_goals(home = TRUE) %>% 
+        select(Period = per, Time = time, `H Goal` = goal, `H Asst1` = ass, `H Asst2` = ass_2)
+    v_scores <- box_score %>% scorecard_goals(home = FALSE) %>% 
+        select(Period = per, Time = time, `A Goal` = goal, `A Asst1` = ass, `A Asst2` = ass_2)
+    h_adj_scores <- box_score %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) 
+    v_adj_scores <- box_score %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE)
+    fair_goals <- bind_rows(h_adj_scores, v_adj_scores) %>% 
+        select(Period = per, Time = time) %>% 
+        mutate(adj = " ")
+    
+    
+    all_scores <- bind_rows(
+        h_scores %>% left_join(fair_goals, join_by(Period, Time)),
+        v_scores %>% left_join(fair_goals, join_by(Period, Time))) %>% 
+        mutate(timesort = ymd_hm(paste('2021-01-01', Time)),
+               adj = ifelse(is.na(adj), "*", adj)) %>% 
+        arrange(Period, timesort) %>% 
+        select(-timesort)
+    
+    return(all_scores)
 }
 
 #need this because roster from scorecard don't always match team roster names

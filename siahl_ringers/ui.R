@@ -1,4 +1,3 @@
-# ui.R
 library(shiny)
 library(shinyMobile)
 library(gt)
@@ -29,6 +28,10 @@ f7Page(
                 f7Col(uiOutput("ringers_label"), width = 2),
                 f7Col(gt::gt_output("away_team_ringers"), width = 5),
                 f7Col(gt::gt_output("home_team_ringers"), width = 5)
+            ),
+            f7Row(
+                f7Col(uiOutput("scoring_label"), width = 2),
+                f7Col(gt::gt_output("scoring"), width = 10)
             ),
             verbatimTextOutput("update_time")
         )
