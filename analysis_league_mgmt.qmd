@@ -114,7 +114,7 @@ away_ringers <- away_ringers_tbl %>%
 scoring_gt
 ```
 
-There's only one ringer playing in this game, but they've had quite an effect! Their scoring changed what would otherwise have been a tie to a 4 goal rout.
+There's only one ringer playing in this game (jersey #06), but they've had quite an effect! Their scoring changed what would otherwise have been a tie to a 4 goal rout.
 
 In the plot below we look at the all the games played by the `Irish`, and use the adjusted score (the score if all goals that involved ringers were removed) to determine whether there was an impact on the standings. For example in the game above, the `Irish` was awarded 2 points in the standings for the win, versus the 1 point each team would have earned had the game ended in a tie.
 

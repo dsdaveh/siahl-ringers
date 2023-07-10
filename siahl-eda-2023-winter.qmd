@@ -232,9 +232,9 @@ geom_arrow <- function(...) {
                                     angle = 20, length = unit(0.1, "inches")))
 }
 
-game_note <- 17
+game_note <- 12
 annotate_diff <- worst_case_season %>% arrange(`Game/ID`) %>% .[game_note, ]
-note_orig <- sprintf(" Original Goal Differential (%d-%d)", annotate_diff$goals_for, annotate_diff$goals_against)
+note_orig <- sprintf(" Original Goal\nDifferential (%d-%d)", annotate_diff$goals_for, annotate_diff$goals_against)
 note_adj <- sprintf("Adjusted (%d-%d) ", annotate_diff$adj_goals_for, annotate_diff$adj_goals_against)
 goal_diff_plt <- worst_case_season %>% 
     ggplot(aes(y = `Game/ID`, yend = `Game/ID`, x = goal_diff)) +
@@ -247,8 +247,8 @@ goal_diff_plt <- worst_case_season %>%
              label = note_adj, hjust = "right", color = 'darkred') +
     geom_arrow(aes(xend = adj_gdiff), color = "blue", 
                data = . %>% filter(goal_diff != adj_gdiff)) +
-    ggtitle("Change in goal differential when ringer influenced goals are removed",
-            subtitle = "(Arrows touching/passing through 0 indicate a change in Standings points)") +
+    ggtitle("Change in goal differential w ringer influenced goals  removed",
+            subtitle = "(Arrows touching/passing through 0 affect Standings points)") +
     xlab("")
 goal_diff_plt
 ```
