@@ -2,6 +2,8 @@ library(shiny)
 library(shinyMobile)
 library(gt)
 
+flex3 <- c("flex: 2;", "flex: 5;", "flex: 5;" )
+
 f7Page(
     title = "Hockey Game Ringer Effects",
     options = list(
@@ -24,19 +26,29 @@ f7Page(
                 f7Col(uiOutput("game_division"))
             ),
             f7Row(
-                f7Col(uiOutput("score_label"), width = 2),
-                f7Col(uiOutput("away_team_info"), width = 5),
-                f7Col(uiOutput("home_team_info"), width = 5)
+                f7Col(style = flex3[1]), # leave this empty for alignment
+                f7Col(uiOutput("away_header"), style = flex3[2]),
+                f7Col(uiOutput("home_header"), style = flex3[3])
             ),
             f7Row(
-                f7Col(uiOutput("adjusted_label"), width = 2),
-                f7Col(uiOutput("away_team_adj_info"), width = 5),
-                f7Col(uiOutput("home_team_adj_info"), width = 5)
+                f7Col(style = flex3[1]), # leave this empty for alignment
+                f7Col(uiOutput("away_team_name"), style = flex3[2]),
+                f7Col(uiOutput("home_team_name"), style = flex3[3])
             ),
             f7Row(
-                f7Col(uiOutput("ringers_label"), width = 2),
-                f7Col(gt::gt_output("away_team_ringers"), width = 5),
-                f7Col(gt::gt_output("home_team_ringers"), width = 5)
+                f7Col(style = flex3[1], uiOutput("score_label")),
+                f7Col(style = flex3[2], uiOutput("away_team_score")),
+                f7Col(style = flex3[3], uiOutput("home_team_score"))
+            ),
+            f7Row(
+                f7Col(uiOutput("adjusted_label"), style = flex3[1]),
+                f7Col(uiOutput("away_team_adj_info"), style = flex3[2]),
+                f7Col(uiOutput("home_team_adj_info"), style = flex3[3])
+            ),
+            f7Row(
+                f7Col(uiOutput("ringers_label"), style = flex3[1]),
+                f7Col(gt::gt_output("away_team_ringers"), style = flex3[2]),
+                f7Col(gt::gt_output("home_team_ringers"), style = flex3[3])
             ),
             f7Row(
                 f7Col(gt::gt_output("scoring"))

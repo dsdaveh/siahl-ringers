@@ -27,37 +27,54 @@ shinyServer(function(input, output) {
         })
     })
     
-    output$away_team_info <- renderUI({
+    output$away_header <- renderUI({
         req(game_data())
-        tagList(
-            h4("Away"),
-            h5(game_data()$v_team),
-            div(style = paste0("color: white; background-color: ", 
-                               if(game_data()$v_goals > game_data()$h_goals) {"green"} 
-                               else if(game_data()$v_goals < game_data()$h_goals) {"red"} 
-                               else {"orange"}, "; padding: 5px; display: inline-block;"), game_data()$v_goals)
-        )
+        h4("Away", align = "center")
     })
     
-    output$home_team_info <- renderUI({
+    output$home_header <- renderUI({
         req(game_data())
-        tagList(
-            h4("Home"),
-            h5(game_data()$h_team),
+        h4("Home", align = "center")
+    })
+    
+    output$away_team_name <- renderUI({
+        req(game_data())
+        h5(game_data()$v_team, align = "center")
+    })
+    
+    output$home_team_name <- renderUI({
+        req(game_data())
+        h5(game_data()$h_team, align = "center")
+    })
+    
+    output$away_team_score <- renderUI({
+        req(game_data())
+        div(style = paste0("color: white; background-color: ", 
+                           if(game_data()$v_goals > game_data()$h_goals) {"green"} 
+                           else if(game_data()$v_goals < game_data()$h_goals) {"red"} 
+                           else {"orange"}, "; padding: 5px; display: inline-block;"),
+            game_data()$v_goals)
+    })
+    
+    output$home_team_score <- renderUI({
+        req(game_data())
+        div(style = "text-align: center;",
             div(style = paste0("color: white; background-color: ", 
                                if(game_data()$h_goals > game_data()$v_goals) {"green"} 
                                else if(game_data()$h_goals < game_data()$v_goals) {"red"} 
-                               else {"orange"}, "; padding: 5px; display: inline-block;"), game_data()$h_goals)
-        )
-    })
-    
+                               else {"orange"}, "; padding: 5px; display: inline-block;"),
+                game_data()$h_goals))
+    })    
     output$away_team_adj_info <- renderUI({
         req(game_data())
         tagList(
             div(style = paste0("color: white; background-color: ", 
                                if(game_data()$vg_adj > game_data()$hg_adj) {"green"} 
                                else if(game_data()$vg_adj < game_data()$hg_adj) {"red"} 
-                               else {"orange"}, "; padding: 5px; display: inline-block;"), game_data()$vg_adj)
+                               else {"orange"}, 
+                               "; padding: 5px; display: inline-block; text-align: center;"
+                               ),
+                game_data()$vg_adj)
         )
     })
     
@@ -67,7 +84,8 @@ shinyServer(function(input, output) {
             div(style = paste0("color: white; background-color: ", 
                                if(game_data()$hg_adj > game_data()$vg_adj) {"green"} 
                                else if(game_data()$hg_adj < game_data()$vg_adj) {"red"} 
-                               else {"orange"}, "; padding: 5px; display: inline-block;"), game_data()$hg_adj)
+                               else {"orange"}, "; padding: 5px; display: inline-block;"), 
+                game_data()$hg_adj)
         )
     })
     
