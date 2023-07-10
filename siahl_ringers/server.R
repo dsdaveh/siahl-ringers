@@ -138,14 +138,17 @@ shinyServer(function(input, output) {
         h6("Ringers", align = "right")
     })
     
+    gt_small_font <- function(x, ...) {gt(x, ...) %>% tab_options(table.font.size = "small")}
     output$away_team_ringers <- gt::render_gt({
         req(game_data())
-        gt(game_data()$v_ringers)
+        game_data()$v_ringers %>% 
+            gt_small_font()
     })
     
     output$home_team_ringers <- gt::render_gt({
         req(game_data())
-        gt(game_data()$h_ringers)
+        game_data()$h_ringers  %>% 
+            gt_small_font()
     })
     
     output$scoring_label <- renderUI({
@@ -155,7 +158,8 @@ shinyServer(function(input, output) {
     
     output$scoring <- gt::render_gt({
         req(game_data())
-        gt(game_data()$scoring)
+        game_data()$scoring %>% 
+            gt_small_font()
     })
     
     
