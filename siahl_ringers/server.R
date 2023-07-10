@@ -5,6 +5,12 @@ library(gt)
 
 source('../siahl-utils.R')
 
+wlt_color <- function(score, comparison) {
+    if (score > comparison) return("green")
+    if (score < comparison) return("red")
+    return("orange")
+}
+
 shinyServer(function(input, output) {
     game_data <- reactiveVal()
     
@@ -56,14 +62,17 @@ shinyServer(function(input, output) {
             game_data()$v_goals)
     })
     
+    score_display <- function(score_number, score_color) {
+        div(style = "text-align: center;",
+            div(style = paste0("color: white; background-color: ", score_color,
+                               "; padding: 5px; display: inline-block;"),
+                score_number))
+    }
     output$home_team_score <- renderUI({
         req(game_data())
-        div(style = "text-align: center;",
-            div(style = paste0("color: white; background-color: ", 
-                               if(game_data()$h_goals > game_data()$v_goals) {"green"} 
-                               else if(game_data()$h_goals < game_data()$v_goals) {"red"} 
-                               else {"orange"}, "; padding: 5px; display: inline-block;"),
-                game_data()$h_goals))
+        score_number <- game_data()$h_goals
+        score_color <- wlt_color(score_number, game_data()$v_goals)
+        score_display(score_number, score_color)
     })    
     output$away_team_adj_info <- renderUI({
         req(game_data())
