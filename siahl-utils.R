@@ -114,8 +114,8 @@ construct_scoring_table <- function(box_score) {
     
     
     all_scores <- bind_rows(
-        h_scores %>% left_join(fair_goals, join_by(Period, Time)),
-        v_scores %>% left_join(fair_goals, join_by(Period, Time))) %>% 
+        v_scores %>% left_join(fair_goals, join_by(Period, Time)),
+        h_scores %>% left_join(fair_goals, join_by(Period, Time))) %>% 
         mutate(timesort = ymd_hm(paste('2021-01-01', Time)),
                adj = ifelse(is.na(adj), "*", adj)) %>% 
         arrange(Period, timesort) %>% 
@@ -185,9 +185,10 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
                 playing %>% 
                     filter(match_name == "<NOT_FOUND>") %>% 
                     select(-match_name) %>% 
-                    mutate(Division = division,
-                           Team = team,
-                           Game = game_id))
+                    mutate(#Game = game_id, #game_id isn't missing TODO extract from box_score
+                           Division = division,
+                           Team = team
+                           ))
         }
     }
     

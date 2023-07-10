@@ -15,7 +15,7 @@ source('siahl-utils.R')
 load('siahl-eda-2023_winter.qmd.RData')
 ```
 
-**An open letter to Sharks Ice Adult Hockey League Management**
+### **An open letter to Sharks Ice Adult Hockey League Management**
 
 The Sharks Ice Adult Hockey League is unquestionably an impressive organization with nearly 2000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons. A fact we'll take advantage of for this analysis.
 
@@ -23,7 +23,9 @@ As a long time Sharks Ice player, I've watch the league (and it's predecessors) 
 
 Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It's important for the health of the league as well, since fair play makes for a better experience for new comers, ensuring a healthy and growing increase in players. By allowing ringers to upset the natural competitive balance with a division, the league risks choking off an important source of future revenue by discouraging newcomers.
 
-Is the ringer effect real? We can take a look at the public data available at `r base_url` which shows that effect of ringers not only has significant impact, but that impact increases drastically in the lower level of play, precisely those who are ...
+### Is the ringer effect real?
+
+We can take a look at the public data available at `r base_url` which shows that effect of ringers not only has significant impact, but that impact increases drastically in the lower level of play, precisely those who are ...
 
 ```{r}
 effect_by_div_plt
@@ -43,7 +45,7 @@ n_ringers <- nrow(ringers)
 ```
 
 |                                                                                  |                     |
-|----------------------------------------------------------------------------------|---------------------|
+|---------------------------------------------------|---------------------|
 | Total number of games played across all divisions                                | `r n_games`         |
 | Number of Divisions                                                              | `r n_divisions`     |
 | Number of Teams                                                                  | `r n_teams`         |
@@ -72,54 +74,96 @@ One way to attempt to quantify a ringer impact at the game level, is to look at 
 
 [![Irish Car Bombs 4 vs Ice Monkeys game 384789](images/siahl_game_384789.png){fig-alt="Irish Car Bombs 4 vs Ice Monkeys game 384789"}](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display)
 
+Now let's take a look the scoring for the game: It's arranged here with goals, primary and secondary assists on left for the home team, and on the left for the visiting team and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and an asterisk (\*) in the `adj` column.
+
 ```{r}
 game_id <- '384789*'
-home_team <- games %>% filter(Game == game_id) %>% pull(Home) %>% head(1)
-away_team <- games %>% filter(Game == game_id) %>% pull(Away) %>% head(1)
 
-fix_cols <- c("Period", "Time", "empty", "Goal", "Assist1", "Assist2", "Team")
-scoring_orig <- bind_rows(
-    scorecards[['384789*']] %>% scorecard_goals(home=TRUE) %>% 
-        mutate(Team = home_team),
-    scorecards[['384789*']] %>% scorecard_goals(home=FALSE) %>% 
-        mutate(Team = away_team),
-)
-names(scoring_orig) <- fix_cols
-scoring_orig <- scoring_orig %>% select(-empty)
+score_info <- game_info(game_id)
+scoring_gt <- score_info[['scoring']] %>% 
+    gt() %>% 
+    sub_missing(
+        columns = everything()
+    ) %>% 
+    tab_style(
+        style = cell_fill(color = "yellow"),
+        locations = cells_body(
+            rows = score_info[['scoring']]$adj == "*"
+        )
+    )
 
-scoring_adj <- bind_rows(
-    scorecards[['384789*']] %>% scorecard_goals(home=TRUE, remove_ringer_goals = TRUE) %>% 
-        mutate(Team = home_team),
-    scorecards[['384789*']] %>% scorecard_goals(home=FALSE, remove_ringer_goals = TRUE) %>% 
-        mutate(Team = away_team),
-)
-names(scoring_adj) <- fix_cols
-scoring_adj <- scoring_adj %>% select(-empty)
+home_ringers_tbl <- scorecards[[game_id]] %>%  get_ringers(home = TRUE) 
+away_ringers_tbl <- scorecards[[game_id]] %>%  get_ringers(home = FALSE)
 
-ringer_tag <- scoring_adj %>% mutate(tag = 'legit') %>% select(Period, Time, tag)
-scoring <- scoring_orig %>% 
-    left_join(ringer_tag, by = c('Period', 'Time') ) %>% 
-    mutate("Ringer" = ifelse(is.na(tag), "YES", "NO")) %>% 
-    select(-tag)
+code_map <- players %>% 
+    filter(Name %in% c(home_ringers_tbl$match_name, 
+                       away_ringers_tbl$match_name)) %>% 
+    select(Name, codename) %>% 
+    unique()
 
-home_ringers <- scorecards[['384789*']] %>%  get_ringers(home = TRUE)
-away_ringers <- scorecards[['384789*']] %>%  get_ringers(home = FALSE)
+home_ringers <- home_ringers_tbl %>% 
+    left_join(code_map, by = c('match_name' = 'Name')) %>% 
+    pull(codename)
 
-scoring
+away_ringers <- away_ringers_tbl %>% 
+    left_join(code_map, by = c('match_name' = 'Name')) %>% 
+    pull(codename)
 
-
+scoring_gt
 ```
 
-When we filter for ringers we see that each team has a few:\
-`r home_team` : `r paste(home_ringers)`
+There's only one ringer playing in this game, but they've had quite an effect, Changing what would otherwise have been a tie to a 4 goal rout! The names listed are changed to protect individual identities.
 
-`r away_team` : `r paste(away_ringers)`
+\
+`r score_info$h_team` : Count `r length(home_ringers)` - `r paste(home_ringers)`
+
+`r score_info$v_team` : Count `r length(away_ringers)` - `r paste(away_ringers)`
+
+In the plot below we look at the all the games played by the Ice Monkeys, and use the adjusted score (the score if all goals that involved ringers were removed) to determine whether there was an impact on the standings. For example in the game above, the winning team was awarded 2 points in the standings for the win, versus the 1 point each team would have one had the game ended in a tie.
 
 ```{r}
 goal_diff_plt
 
 ```
 
+More comprehensively, we can see how all the teams standings in this division would have changed, if the adjusted score had been the actual score.
+
 ```{r}
 worst_rank_change_plt
 ```
+
+To be sure, we can't assume the games could be reasonably adjusted using this method, but instead propose the adjustment as a proxy for measuring one aspect of how ringers affect games. There are certainly other affects at play would be harder to measure, for example a defenseman playing in a league they are overqualified for is likely to shut down scoring for more novice players, but that impact wouldn't be directly observable on the score sheet.
+
+### How to address the problem
+
+The league already has a policy that is supposed to prevent players from playing on teams that span more than 2 division levels. Unfortunately, this rule hasn't been enforced, presumably because it's difficult identify the ringers in time to prevent them from playing.
+
+This problem can be easily addressed using an app that scans past games (to identify ringers) and current game rosters to alert captains to potential issues. A proof-of-concept application has been developed for this purpose and is available [here](https://dsdaveh.shinyapps.io/siahl_ringers/):
+
+::: grid
+::: g-col-4
+![](images/ringer_app_poc.png)
+:::
+
+::: g-col-8
+<span style="color:red;">
+*NOTE*: This is app is currently pre-alpha, and should only be used to get an idea for what is possible.
+
+It is best viewed on an iPhone.
+</span>
+
+To use it:
+
+<li>
+* Enter a game number 
+    * Games from the current season only (eg. 387361)
+    * Game numbers can be seen from the SIAHL team pages
+* `Score` is the actual games score
+* `Adjusted` is the score if all goals involving ringers were removed
+* `Ringers` are a list of players who also play on teams in higher skilled (lower numbered) divisions more than 2 from division the current game is being played in
+* Yellow lines in the score line indicate goals that would be removed for the "adjustment"
+</li>
+
+
+:::
+:::
