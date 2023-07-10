@@ -3,7 +3,7 @@ library(shiny)
 library(shinyMobile)
 library(gt)
 
-source('../siahl-utils.R')
+source('siahl-utils.R')
 
 wlt_color <- function(score, comparison) {
     if (score > comparison) return("green")

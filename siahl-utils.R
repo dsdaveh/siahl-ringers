@@ -49,10 +49,13 @@ mtime <- NA_POSIXct_
 game_info <- function(game_id) {
     if (! (exists("scorecards") && exists("all_teams"))) {
         message("loading data from Current season...")
-        rdata_file <- "siahl-eda-Current.qmd.RData"
-        load(rdata_file, .GlobalEnv)
+        # rdata_file <- "siahl-eda-Current.qmd.RData"
+        # load(rdata_file, .GlobalEnv)
+        scorecards <<- readRDS('scorecards.RDS')
+        all_teams <<- readRDS('all_teams.RDS')
         
-        mtime <<- file.mtime(rdata_file)
+        # mtime <<- file.mtime(rdata_file)
+        mtime <<- file.mtime('scorecards.RDS')
     }
     # test with game_info("387361*")
     # 

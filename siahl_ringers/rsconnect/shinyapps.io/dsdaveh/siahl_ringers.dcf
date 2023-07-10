@@ -1,0 +1,14 @@
+name: siahl_ringers
+title: siahl_ringers
+username:
+account: dsdaveh
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 9432230
+bundleId: 7438130
+url: https://dsdaveh.shinyapps.io/siahl_ringers/
+when: 1688961635.92623
+lastSyncTime: 1688961635.92625
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: ln_siahl-eda-Current.qmd.RData|scorecards-Current.RDS|siahl-eda-Current.qmd.RData
