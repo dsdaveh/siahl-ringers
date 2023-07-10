@@ -79,7 +79,7 @@ shinyServer(function(input, output) {
     output$adjusted_label <- renderUI({
         req(game_data())
         h6("Adjusted*", align = "right")
-    })
+     })
     
     # Display the update time
     output$update_time <- renderText({
@@ -87,9 +87,39 @@ shinyServer(function(input, output) {
         paste("Last update:", game_data()$update_time)
     })
     
+    # Display the start time
+    output$start_time <- renderUI({
+        req(game_data())
+        puck_drop = paste("Puck drop:", 
+              format(game_data()$start_time, "%d-%b-%Y %H:%M %Z"))
+        h6(puck_drop)
+    })
+    
+    # Display the game status
+    output$game_status <- renderUI({
+        req(game_data())
+        game_status <- game_data()$game_status
+        tagList(
+            div(style = paste0("color: white; background-color: ",
+                               if(game_status == "Completed") {"green"}
+                               else if(game_status == "Not started") {"gray"}
+                               else {"orange"}, 
+                               "; padding: 5px; display: inline-block;",
+                               " vertical-align: text-bottom;"),
+                game_status)
+        )
+    })
+    
+    output$game_division <- renderUI({
+        req(game_data())
+        h6(game_data()$division)
+    })
+    
+    
+    
     output$ringers_label <- renderUI({
         req(game_data())
-        tags$p("Ringers", style = "text-align:right")
+        h6("Ringers", align = "right")
     })
     
     output$away_team_ringers <- gt::render_gt({

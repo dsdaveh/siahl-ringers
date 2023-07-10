@@ -22,12 +22,18 @@ promote_header <- function(df) {
 #get the ringer adjusted info for a game
 #TODO - this steps on current GlobalEnv, so should not be in this utils file.
 
+get_box_score <- function(game_id) {
+    game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
+                       base_url ,str_extract(game_id, '\\d+')) 
+    game_url %>% read_html() %>% as.character()
+}
+
 check_valid_game_id <- function(game_id) {
     #web site returns a scoreboard for virtually any game_id,
     # check that the data is within the scope expected
     game_url = sprintf("%soss-scoresheet?game_id=%s&mode=display", 
                        base_url ,str_extract(game_id, '\\d+')) 
-    box_score <- game_url %>% read_html() %>% as.character()
+    box_score <- get_box_score(game_id)
     
     # *SOME* game_ids return nothing
     td_check <- box_score %>% read_html() %>% html_elements("td")
@@ -71,6 +77,7 @@ game_info <- function(game_id) {
         game_id = game_id,
         update_time = update_time,
         start_time = scorecard %>% scorecard_game_time(),
+        game_status = scorecard %>% scorecard_game_status(),
         division = paste("SIAHL@SJ Division", scorecard %>% scorecard_division(), collapse = " "),
         h_team = scorecard %>% scorecard_teamname(home = TRUE),
         v_team = scorecard %>% scorecard_teamname(home = FALSE),
@@ -235,7 +242,7 @@ scorecard_game_time <- function(box_score) {
 scorecard_meta <- function(box_score) {
     meta <- box_score %>% 
         read_html() %>% 
-        html_elements("td")  %>% 
+        html_elements("td td")  %>% 
         html_text2() %>% 
         .[str_detect(., '^\\w+:')] %>%   # finds 'Key:Value ...'
         .[! str_detect(., '\\t')]       # remove multiple Key:Value
@@ -244,6 +251,21 @@ scorecard_meta <- function(box_score) {
     names(vals) <- keys
     return(vals)
 }
+
+scorecard_game_status <- function (box_score) {
+    if (scorecard_game_time(box_score) > now() ) return("Not started")
+    score_table <- box_score %>% 
+        read_html() %>% 
+        html_elements("td:nth-child(3) table")  %>% 
+        html_table() %>% 
+        .[[1]]
+    
+    v_final <- score_table$Final[1]
+    if (is.na(v_final)) return("In progress")
+    stopifnot(is.numeric(v_final))
+    return("Completed")
+}
+
 
 game_division_lkp <- function(id) {
     games %>% filter(Game == id) %>% pull(Division) %>% head(1)
