@@ -159,7 +159,16 @@ shinyServer(function(input, output) {
     output$scoring <- gt::render_gt({
         req(game_data())
         game_data()$scoring %>% 
-            gt_small_font()
+            gt_small_font() %>%
+            sub_missing(
+                columns = everything()
+            ) %>% 
+            tab_style(
+                style = cell_fill(color = "yellow"),
+                locations = cells_body(
+                    rows = game_data()$scoring$adj == "*"
+                )
+            )
     })
     
     
