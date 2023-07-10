@@ -19,19 +19,21 @@ load('siahl-eda-2023_winter.qmd.RData')
 
 The Sharks Ice Adult Hockey League is unquestionably an impressive organization with nearly 2000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons. A fact we'll take advantage of for this analysis.
 
-As a long time Sharks Ice player, I've watch the league (and it's predecessors) grow over the past 30+ years. As the level of play improves, age catches up with my own skills and I've had to drop levels over time in order to remain competitive. Unfortunately, its impossible to miss the fact the lower skilled divisions have a severe and increasing problem with ringers, that is, players whose skill level far exceeds the level they are playing in. As in all recreational sports, there are some atheletes that prefer to compete below their abilty, reasons can vary, and in some cases the decision may be justified, but its important to recognize the impact this has on the lower leagues and individual players in them who are wanting to develop their own skills and engage in fair competition.
+As a long time Sharks Ice player, I've watch the league (and it's predecessors) grow over the past 30+ years. As the level of play improves, age catches up with my own skills and I've had to drop levels over time in order to remain competitive. Unfortunately, its impossible to miss the fact the lower skilled divisions have a severe and increasing problem with ringers, that is, players whose skill and stamina far exceeds the level they are playing in. As in all recreational sports, there are some atheletes that prefer to compete below their abilty, reasons can vary, and in some cases the decision may be justified, but its important to recognize the impact this has on the lower leagues and individual players in them who are wanting to develop their own skills and engage in fair competition.
 
-Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It's important for the health of the league as well, since fair play makes for a better experience for new comers, ensuring a healthy and growing increase in players. By allowing ringers to upset the natural competitive balance with a division, the league risks choking off an important source of future revenue by discouraging newcomers.
+Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It's important for the health of the league as well, since fair play makes for a better experience for new comers, ensuring a healthy and growing increase in players.
+
+The bottom line for the league management is clear. By allowing ringers to upset the natural competitive balance within a division, the league risks choking off an important source of future revenue by discouraging newcomers.
 
 ### Is the ringer effect real?
 
-We can take a look at the public data available at `r base_url` which shows that effect of ringers not only has significant impact, but that impact increases drastically in the lower level of play, precisely those who are ...
+We can take a look at the public data available at `r base_url` which shows that the *ringer effect* not only has significant impact, but that impact increases drastically in the lower level of play. The chart below shows that a whopping 18% of games in division 8 would have had different outcomes affecting the division standings. This is a conservative estimate, as we're limiting our definition of ringers to explicit violations of league policy. While the chart below shows a clear increase in *ringer effect* with division-level (Division 1 = best players), the correlation isn't perfect since the our 'ringer' definition is constrained to policy and the limits of the available data.
 
 ```{r}
 effect_by_div_plt
 ```
 
-The remainder of this article explains the methodology behind this conclusion and dives deeper into some of the more egregious offending teams. We also suggest a simple remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team's game and league rankings.
+The remainder of this article explains the methodology behind this conclusion and dives deeper into some of the more egregious offending teams. We also suggest a straight-forward remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team's game and league rankings.
 
 Let's start with some simple facts about about the league. This data represents the most recent complete season of `Winter 2023`.
 
@@ -45,7 +47,7 @@ n_ringers <- nrow(ringers)
 ```
 
 |                                                                                  |                     |
-|---------------------------------------------------|---------------------|
+|--------------------------------------------------|----------------------|
 | Total number of games played across all divisions                                | `r n_games`         |
 | Number of Divisions                                                              | `r n_divisions`     |
 | Number of Teams                                                                  | `r n_teams`         |
@@ -68,13 +70,13 @@ team_stats %>%
     
 ```
 
-There's a weak correlation (`r ringer_gc_cor |> round (3)`) between the Ringer/Game Count and the team rankings at the end of the season, which would initially imply that the ringers don't have a major impact on the season outcomes, but a more thorough look tells a different story.
+There's a weak correlation (r = `r ringer_gc_cor |> round (3)`) between the Ringer/Game Count and the team rankings at the end of the season, which would initially imply that the ringers don't have a major impact on the season outcomes, but a more thorough look tells a different story.
 
 One way to attempt to quantify a ringer impact at the game level, is to look at scoring that involves ringers. That is, if a ringer scores or assists a goal in a game, we can remove that point from the score and compare the adjusted score to the actual final score to see if affects the outcome. To illustrate, let's look at [this Division 8A game](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display) between the `Ice Monkeys` and the `Irish Car Bombs 4` . The final score was 7-3 in favor of the `Irish` giving them a decided 2 pts towards their #1 rank for the final season.
 
 [![Irish Car Bombs 4 vs Ice Monkeys game 384789](images/siahl_game_384789.png){fig-alt="Irish Car Bombs 4 vs Ice Monkeys game 384789"}](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display)
 
-Now let's take a look the scoring for the game: It's arranged here with goals, primary and secondary assists on left for the visiting team and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and an asterisk (\*) in the `adj` column.
+Now let's take a look at the scoring for the game: It's arranged here with goals, primary and secondary assists on left for the visiting team and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and have an asterisk (\*) in the `adj` column.
 
 ```{r}
 game_id <- '384789*'
@@ -112,7 +114,7 @@ away_ringers <- away_ringers_tbl %>%
 scoring_gt
 ```
 
-There's only one ringer playing in this game, but they've had quite an effect! Their scoring changed what would otherwise have been a tie to a 4 goal rout. 
+There's only one ringer playing in this game, but they've had quite an effect! Their scoring changed what would otherwise have been a tie to a 4 goal rout.
 
 In the plot below we look at the all the games played by the `Irish`, and use the adjusted score (the score if all goals that involved ringers were removed) to determine whether there was an impact on the standings. For example in the game above, the `Irish` was awarded 2 points in the standings for the win, versus the 1 point each team would have earned had the game ended in a tie.
 
@@ -131,9 +133,9 @@ To be sure, we can't assume the games could be reasonably adjusted using this me
 
 ### How to address the problem
 
-The league already has a policy against players from playing on teams that span more than 2 division levels. Unfortunately, this rule hasn't been enforced, presumably because it's difficult identify the ringers in time to prevent them from playing.
+The league already has a policy against players playing on teams that span more than 2 division levels. Unfortunately, this rule hasn't been enforced, presumably because it's difficult to identify the ringers in time to prevent them from playing.
 
-This problem can be easily addressed using an app that scans past games (to identify ringers) and current game rosters to alert captains to potential issues. A proof-of-concept application has been developed for this purpose and is available [here](https://dsdaveh.shinyapps.io/siahl_ringers/):
+This problem can be easily addressed using an app that scans past and current game rosters to alert captains to potential violations. A proof-of-concept application has been developed for this purpose and is available [here](https://dsdaveh.shinyapps.io/siahl_ringers/):
 
 ::: grid
 ::: g-col-4
@@ -141,29 +143,25 @@ This problem can be easily addressed using an app that scans past games (to iden
 :::
 
 ::: g-col-8
-<span style="color:red;">
-*NOTE*: This is app is currently pre-alpha, and should only be used to get an idea for what is possible.
+<span style="color:red;"> *NOTE*: This is app is currently pre-alpha, and should only be used to get an idea for what is possible.
 
-It is best viewed on an iPhone.
-</span>
+It is best viewed on an iPhone. </span>
 
 To use it:
 
-<li>
-* Enter a game number 
-    * Games from the current season only (eg. 387361)
-    * Game numbers can be seen from the SIAHL team pages
-    * (I plan to expand the UI to make games easier to find)
-* `Score` is the actual games score
-* `Adjusted` is the score if all goals involving ringers were removed
-* `Ringers` are a list of players who also play on teams in higher skilled (lower numbered) divisions more than 2 from division the current game is being played in
-* Yellow lines in the score line indicate goals that would be removed for the "adjustment"
-</li>
-
-
+-   Enter a game number
+    -   For now - Games from the current season only (eg. 387361)
+    -   Game numbers can be seen from the SIAHL team pages
+    -   (**future plans** to expand the UI to make games easier to find)
+-   `Score` is the actual games score
+-   `Adjusted` is the score if all goals involving ringers were removed
+-   `Ringers` are a list of players who also play on teams in higher skilled (lower numbered) divisions more than 2 from division the current game is being played in
+-   Yellow lines in the score line indicate goals that would be removed for the "adjustment"
 :::
 :::
 
-The practical application would be to allow captains, at any point in an active game, to protest an opposing player that should be disqualified to play at that level due to being on a roster in a more than 3 division-levels removed from the current game.
+The practical application for this app is to allow captains, at any point in an active game, to protest an opposing player that should be disqualified to play at that level due to being on a team roster more than 3 division-levels removed from the current game.
 
-Putting such a policy in place, would be a great first step to cleansing the league from the affects of players who corrupt the fairness principles inherent to sports, and would encourage novice players that who endeavour to learn the great sport of hockey as adults.
+Putting such a policy in place, would be a great first step to cleansing the league from the affects of players who corrupt the fairness principles inherent to sports, and would encourage novice players who endeavour to learn the great sport of hockey as adults.
+
+By accomplishing this, the Sharks Ice management would affirm their commitment to fair play, and would safeguard a path to both player and franchise fan growth over the future.
