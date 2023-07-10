@@ -19,23 +19,25 @@ load('siahl-eda-2023_winter.qmd.RData')
 
 The Sharks Ice Adult Hockey League is unquestionably an impressive organization with nearly 2000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons. A fact we'll take advantage of for this analysis.
 
-As a long time Sharks Ice player, I've watch the league (and it's predecessors) grow over the past 30+ years. As the level of play improves, age catches up with my own skills and I've had to drop levels over time in order to remain competitive. Unfortunately, its impossible to miss the fact the lower skilled divisions have a severe and increasing problem with ringers, that is, players whose skill and stamina far exceeds the level they are playing in. As in all recreational sports, there are some atheletes that prefer to compete below their abilty, reasons can vary, and in some cases the decision may be justified, but its important to recognize the impact this has on the lower leagues and individual players in them who are wanting to develop their own skills and engage in fair competition.
+As a long time Sharks Ice player, I've watch the league (and it's predecessors) grow over the past 30+ years. As the level of play improves, age catches up with my own skills and I've had to drop levels over time in order to remain competitive. Unfortunately, its impossible to miss the fact the lower skilled divisions have a severe and increasing problem with ringers, that is, players whose skill and stamina far exceed the level they are playing in. As in all recreational sports, there are some athletes that prefer to compete below their ability. Reasons can vary, and in some cases, the decision may be justified, but its important to recognize the impact this has on the lower leagues and individual players in them who are wanting to develop their own skills and engage in fair competition.
 
-Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It's important for the health of the league as well, since fair play makes for a better experience for new comers, ensuring a healthy and growing increase in players.
+Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It's important for the health of the league as well, since fair play makes for a better experience for newcomers, ensuring a healthy and growing increase in players.
 
-The bottom line for the league management is clear. By allowing ringers to upset the natural competitive balance within a division, the league risks choking off an important source of future revenue by discouraging newcomers.
+The bottom line for the league management is clear. By allowing ringers to upset the natural competitive balance within a division, the league risks choking off an important source of future revenue by discouraging those newcomers.
 
 ### Is the ringer effect real?
 
-We can take a look at the public data available at `r base_url` which shows that the *ringer effect* not only has significant impact, but that impact increases drastically in the lower level of play. The chart below shows that a whopping 18% of games in division 8 would have had different outcomes affecting the division standings. This is a conservative estimate, as we're limiting our definition of ringers to explicit violations of league policy. While the chart below shows a clear increase in *ringer effect* with division-level (Division 1 = best players), the correlation isn't perfect since the our 'ringer' definition is constrained to policy and the limits of the available data.
+We can take a look at the public data available at `r base_url` which shows that the *ringer effect* not only has significant impact, but that impact increases drastically in the lowers level of play[^1]. The chart below shows that a whopping 18% of games in division 8 would have had different outcomes affecting the division standings. This is a conservative estimate, as we're limiting our definition of ringers to explicit violations of league policy. The chart below shows a clear increase in *ringer effect* with division-level. It's worth noting the correlation isn't perfect since the our 'ringer' definition is constrained to policy and the limits of the available data.
+
+[^1]: Division numbers go up as the level of play goes down. I.e. Division 1 is the most skilled.
 
 ```{r}
 effect_by_div_plt
 ```
 
-The remainder of this article explains the methodology behind this conclusion and dives deeper into some of the more egregious offending teams. We also suggest a straight-forward remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team's game and league rankings.
+The remainder of this article explains the methodology behind this conclusion and shows an example of one of the teams whose standings were improved due to the ringers on their roster. We also suggest a straight-forward remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team's game outcomes and league rankings.
 
-Let's start with some simple facts about about the league. This data represents the most recent complete season of `Winter 2023`.
+Let's start with some simple facts about about the league. This data represents the most recently completed season, `Winter 2023`.
 
 ```{r}
 n_games <- games %>% count(Game) %>% nrow()
@@ -57,7 +59,7 @@ n_ringers <- nrow(ringers)
 
 : Winter 2023 Season
 
-Let's break that down a bit further by looking at Division/Levels. For clarity, a Division/Level looks only at the division number, for example 7A and 7B designate 2 separate divisions, but the same Division/Level. There are 9 Division/Levels overall, and we count a ringer as any player who has played a game at least 3 Division/Levels below their highest level. The Ringer/Game Count sums the number of games each ringer has played as a ringer.
+Let's break that down a bit further by looking at Division/Levels. For clarity, a Division/Level looks only at the division number, for example 7A and 7B designate 2 separate divisions, but the same Division/Level. There are 9 Division/Levels overall, and we count a ringer as any player who has played a game at least 3 Division/Levels below their highest level. The Ringer/Game Count sums the number of games each player has played as a ringer.
 
 ```{r}
 ringer_gc_cor <- cor(team_stats$ringer_games_count, team_stats$Rank)
@@ -72,11 +74,13 @@ team_stats %>%
 
 There's a weak correlation (r = `r ringer_gc_cor |> round (3)`) between the Ringer/Game Count and the team rankings at the end of the season, which would initially imply that the ringers don't have a major impact on the season outcomes, but a more thorough look tells a different story.
 
-One way to attempt to quantify a ringer impact at the game level, is to look at scoring that involves ringers. That is, if a ringer scores or assists a goal in a game, we can remove that point from the score and compare the adjusted score to the actual final score to see if affects the outcome. To illustrate, let's look at [this Division 8A game](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display) between the `Ice Monkeys` and the `Irish Car Bombs 4` . The final score was 7-3 in favor of the `Irish` giving them a decided 2 pts towards their #1 rank for the final season.
+One way to attempt to quantify a ringer impact at the game level, is to look at scoring that involves ringers. That is, if a ringer scores or assists a goal in a game, we can remove that point from the score and compare the adjusted score to the actual final score to see if the outcome is affected. To illustrate, let's look at [this Division 8A game](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display) between the `Ice Monkeys` and the `Irish Car Bombs 4` . The final score was 7-3 in favor of the `Irish` giving them a decided 2 pts[^2] towards their #1 rank for the final season.
+
+[^2]: A team earns 2 points for a win, 1 point for a regulation tie, and no points for a loss.
 
 [![Irish Car Bombs 4 vs Ice Monkeys game 384789](images/siahl_game_384789.png){fig-alt="Irish Car Bombs 4 vs Ice Monkeys game 384789"}](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display)
 
-Now let's take a look at the scoring for the game: It's arranged here with goals, primary and secondary assists on left for the visiting team and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and have an asterisk (\*) in the `adj` column.
+Now let's take a look at the scoring for the game: It's arranged here with goals, primary and secondary assists on the left for the visiting team, and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and have an asterisk (\*) in the `adj` column.
 
 ```{r}
 game_id <- '384789*'
@@ -114,9 +118,11 @@ away_ringers <- away_ringers_tbl %>%
 scoring_gt
 ```
 
-There's only one ringer playing in this game (jersey #06), but they've had quite an effect! Their scoring changed what would otherwise have been a tie to a 4 goal rout.
+There's only one ringer playing in this game (jersey #06), but they've had quite an effect! Their scoring changed what would otherwise have been a tie into a 4 goal rout.
 
-In the plot below we look at the all the games played by the `Irish`, and use the adjusted score (the score if all goals that involved ringers were removed) to determine whether there was an impact on the standings. For example in the game above, the `Irish` was awarded 2 points in the standings for the win, versus the 1 point each team would have earned had the game ended in a tie.
+In the plot below we look at the all the games played by the `Irish`, and use the adjusted score[^3] to determine whether there was an impact on the standings. For example in the game above, the `Irish` was awarded 2 points in the standings for the win, versus the 1 point each team would have earned had the game ended in a tie.
+
+[^3]: Adjusted score is the score if all goals that involved ringers were removed from the actual final score.
 
 ```{r}
 goal_diff_plt

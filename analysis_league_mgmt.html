@@ -63,20 +63,20 @@ ul.task-list li input[type="checkbox"] {
 <section id="an-open-letter-to-sharks-ice-adult-hockey-league-management" class="level3">
 <h3 class="anchored" data-anchor-id="an-open-letter-to-sharks-ice-adult-hockey-league-management"><strong>An open letter to Sharks Ice Adult Hockey League Management</strong></h3>
 <p>The Sharks Ice Adult Hockey League is unquestionably an impressive organization with nearly 2000 active adult players and well over 100 teams. Games are well run, and players at all levels can find a league that suits their level of intensity and ability. The league is also impressively open with the game statistics which make it fun to track individual and team statistics within and across seasons. A fact we’ll take advantage of for this analysis.</p>
-<p>As a long time Sharks Ice player, I’ve watch the league (and it’s predecessors) grow over the past 30+ years. As the level of play improves, age catches up with my own skills and I’ve had to drop levels over time in order to remain competitive. Unfortunately, its impossible to miss the fact the lower skilled divisions have a severe and increasing problem with ringers, that is, players whose skill and stamina far exceeds the level they are playing in. As in all recreational sports, there are some atheletes that prefer to compete below their abilty, reasons can vary, and in some cases the decision may be justified, but its important to recognize the impact this has on the lower leagues and individual players in them who are wanting to develop their own skills and engage in fair competition.</p>
-<p>Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It’s important for the health of the league as well, since fair play makes for a better experience for new comers, ensuring a healthy and growing increase in players.</p>
-<p>The bottom line for the league management is clear. By allowing ringers to upset the natural competitive balance within a division, the league risks choking off an important source of future revenue by discouraging newcomers.</p>
+<p>As a long time Sharks Ice player, I’ve watch the league (and it’s predecessors) grow over the past 30+ years. As the level of play improves, age catches up with my own skills and I’ve had to drop levels over time in order to remain competitive. Unfortunately, its impossible to miss the fact the lower skilled divisions have a severe and increasing problem with ringers, that is, players whose skill and stamina far exceed the level they are playing in. As in all recreational sports, there are some athletes that prefer to compete below their ability. Reasons can vary, and in some cases, the decision may be justified, but its important to recognize the impact this has on the lower leagues and individual players in them who are wanting to develop their own skills and engage in fair competition.</p>
+<p>Why does this matter? Because most of us who enjoy sports, hold the integrity of the match in high regard, and expect the rules, referees and organizers to facilitate a fair match to the best extent possible. It’s important for the health of the league as well, since fair play makes for a better experience for newcomers, ensuring a healthy and growing increase in players.</p>
+<p>The bottom line for the league management is clear. By allowing ringers to upset the natural competitive balance within a division, the league risks choking off an important source of future revenue by discouraging those newcomers.</p>
 </section>
 <section id="is-the-ringer-effect-real" class="level3">
 <h3 class="anchored" data-anchor-id="is-the-ringer-effect-real">Is the ringer effect real?</h3>
-<p>We can take a look at the public data available at https://stats.sharksice.timetoscore.com/ which shows that the <em>ringer effect</em> not only has significant impact, but that impact increases drastically in the lower level of play. The chart below shows that a whopping 18% of games in division 8 would have had different outcomes affecting the division standings. This is a conservative estimate, as we’re limiting our definition of ringers to explicit violations of league policy. While the chart below shows a clear increase in <em>ringer effect</em> with division-level (Division 1 = best players), the correlation isn’t perfect since the our ‘ringer’ definition is constrained to policy and the limits of the available data.</p>
+<p>We can take a look at the public data available at https://stats.sharksice.timetoscore.com/ which shows that the <em>ringer effect</em> not only has significant impact, but that impact increases drastically in the lowers level of play<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>. The chart below shows that a whopping 18% of games in division 8 would have had different outcomes affecting the division standings. This is a conservative estimate, as we’re limiting our definition of ringers to explicit violations of league policy. The chart below shows a clear increase in <em>ringer effect</em> with division-level. It’s worth noting the correlation isn’t perfect since the our ‘ringer’ definition is constrained to policy and the limits of the available data.</p>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="analysis_league_mgmt_files/figure-html/unnamed-chunk-2-1.png" class="img-fluid" width="672"></p>
 </div>
 </div>
-<p>The remainder of this article explains the methodology behind this conclusion and dives deeper into some of the more egregious offending teams. We also suggest a straight-forward remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team’s game and league rankings.</p>
-<p>Let’s start with some simple facts about about the league. This data represents the most recent complete season of <code>Winter 2023</code>.</p>
+<p>The remainder of this article explains the methodology behind this conclusion and shows an example of one of the teams whose standings were improved due to the ringers on their roster. We also suggest a straight-forward remedy to help curtail the unsportsmanlike practice of enlisting ringers to influence team’s game outcomes and league rankings.</p>
+<p>Let’s start with some simple facts about about the league. This data represents the most recently completed season, <code>Winter 2023</code>.</p>
 <table class="table">
 <caption>Winter 2023 Season</caption>
 <colgroup>
@@ -110,7 +110,7 @@ ul.task-list li input[type="checkbox"] {
 </tr>
 </tbody>
 </table>
-<p>Let’s break that down a bit further by looking at Division/Levels. For clarity, a Division/Level looks only at the division number, for example 7A and 7B designate 2 separate divisions, but the same Division/Level. There are 9 Division/Levels overall, and we count a ringer as any player who has played a game at least 3 Division/Levels below their highest level. The Ringer/Game Count sums the number of games each ringer has played as a ringer.</p>
+<p>Let’s break that down a bit further by looking at Division/Levels. For clarity, a Division/Level looks only at the division number, for example 7A and 7B designate 2 separate divisions, but the same Division/Level. There are 9 Division/Levels overall, and we count a ringer as any player who has played a game at least 3 Division/Levels below their highest level. The Ringer/Game Count sums the number of games each player has played as a ringer.</p>
 <div class="cell">
 <div class="cell-output-display">
 
@@ -609,14 +609,14 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 <p>There’s a weak correlation (r = -0.035) between the Ringer/Game Count and the team rankings at the end of the season, which would initially imply that the ringers don’t have a major impact on the season outcomes, but a more thorough look tells a different story.</p>
-<p>One way to attempt to quantify a ringer impact at the game level, is to look at scoring that involves ringers. That is, if a ringer scores or assists a goal in a game, we can remove that point from the score and compare the adjusted score to the actual final score to see if affects the outcome. To illustrate, let’s look at <a href="https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&amp;mode=display">this Division 8A game</a> between the <code>Ice Monkeys</code> and the <code>Irish Car Bombs 4</code> . The final score was 7-3 in favor of the <code>Irish</code> giving them a decided 2 pts towards their #1 rank for the final season.</p>
+<p>One way to attempt to quantify a ringer impact at the game level, is to look at scoring that involves ringers. That is, if a ringer scores or assists a goal in a game, we can remove that point from the score and compare the adjusted score to the actual final score to see if the outcome is affected. To illustrate, let’s look at <a href="https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&amp;mode=display">this Division 8A game</a> between the <code>Ice Monkeys</code> and the <code>Irish Car Bombs 4</code> . The final score was 7-3 in favor of the <code>Irish</code> giving them a decided 2 pts<a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a> towards their #1 rank for the final season.</p>
 <div class="quarto-figure quarto-figure-center">
 <figure class="figure">
 <p><a href="https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&amp;mode=display"><img src="images/siahl_game_384789.png" class="img-fluid figure-img" alt="Irish Car Bombs 4 vs Ice Monkeys game 384789"></a></p>
 <figcaption class="figure-caption">Irish Car Bombs 4 vs Ice Monkeys game 384789</figcaption>
 </figure>
 </div>
-<p>Now let’s take a look at the scoring for the game: It’s arranged here with goals, primary and secondary assists on left for the visiting team and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and have an asterisk (*) in the <code>adj</code> column.</p>
+<p>Now let’s take a look at the scoring for the game: It’s arranged here with goals, primary and secondary assists on the left for the visiting team, and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and have an asterisk (*) in the <code>adj</code> column.</p>
 <div class="cell">
 <div class="cell-output-display">
 
@@ -1173,8 +1173,8 @@ ul.task-list li input[type="checkbox"] {
 </div>
 </div>
 </div>
-<p>There’s only one ringer playing in this game (jersey #06), but they’ve had quite an effect! Their scoring changed what would otherwise have been a tie to a 4 goal rout.</p>
-<p>In the plot below we look at the all the games played by the <code>Irish</code>, and use the adjusted score (the score if all goals that involved ringers were removed) to determine whether there was an impact on the standings. For example in the game above, the <code>Irish</code> was awarded 2 points in the standings for the win, versus the 1 point each team would have earned had the game ended in a tie.</p>
+<p>There’s only one ringer playing in this game (jersey #06), but they’ve had quite an effect! Their scoring changed what would otherwise have been a tie into a 4 goal rout.</p>
+<p>In the plot below we look at the all the games played by the <code>Irish</code>, and use the adjusted score<a href="#fn3" class="footnote-ref" id="fnref3" role="doc-noteref"><sup>3</sup></a> to determine whether there was an impact on the standings. For example in the game above, the <code>Irish</code> was awarded 2 points in the standings for the win, versus the 1 point each team would have earned had the game ended in a tie.</p>
 <div class="cell">
 <div class="cell-output-display">
 <p><img src="analysis_league_mgmt_files/figure-html/unnamed-chunk-6-1.png" class="img-fluid" width="672"></p>
@@ -1219,7 +1219,15 @@ ul.task-list li input[type="checkbox"] {
 <p>By accomplishing this, the Sharks Ice management would affirm their commitment to fair play, and would safeguard a path to both player and franchise fan growth over the future.</p>
 </section>
 
-</main>
+
+<div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Division numbers go up as the level of play goes down. I.e. Division 1 is the most skilled.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn2"><p>A team earns 2 points for a win, 1 point for a regulation tie, and no points for a loss.<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn3"><p>Adjusted score is the score if all goals that involved ringers were removed from the actual final score.<a href="#fnref3" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main>
 <!-- /main column -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
