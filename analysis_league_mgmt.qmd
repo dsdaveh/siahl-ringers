@@ -74,7 +74,7 @@ One way to attempt to quantify a ringer impact at the game level, is to look at 
 
 [![Irish Car Bombs 4 vs Ice Monkeys game 384789](images/siahl_game_384789.png){fig-alt="Irish Car Bombs 4 vs Ice Monkeys game 384789"}](https://stats.sharksice.timetoscore.com/oss-scoresheet?game_id=384789&mode=display)
 
-Now let's take a look the scoring for the game: It's arranged here with goals, primary and secondary assists on left for the home team, and on the left for the visiting team and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and an asterisk (\*) in the `adj` column.
+Now let's take a look the scoring for the game: It's arranged here with goals, primary and secondary assists on left for the visiting team and on the right for the home team. Goals that involved a player identified as a ringer are highlighted in yellow, and an asterisk (\*) in the `adj` column.
 
 ```{r}
 game_id <- '384789*'
@@ -112,14 +112,9 @@ away_ringers <- away_ringers_tbl %>%
 scoring_gt
 ```
 
-There's only one ringer playing in this game, but they've had quite an effect, Changing what would otherwise have been a tie to a 4 goal rout! The names listed are changed to protect individual identities.
+There's only one ringer playing in this game, but they've had quite an effect! Their scoring changed what would otherwise have been a tie to a 4 goal rout. 
 
-\
-`r score_info$h_team` : Count `r length(home_ringers)` - `r paste(home_ringers)`
-
-`r score_info$v_team` : Count `r length(away_ringers)` - `r paste(away_ringers)`
-
-In the plot below we look at the all the games played by the Ice Monkeys, and use the adjusted score (the score if all goals that involved ringers were removed) to determine whether there was an impact on the standings. For example in the game above, the winning team was awarded 2 points in the standings for the win, versus the 1 point each team would have one had the game ended in a tie.
+In the plot below we look at the all the games played by the `Irish`, and use the adjusted score (the score if all goals that involved ringers were removed) to determine whether there was an impact on the standings. For example in the game above, the `Irish` was awarded 2 points in the standings for the win, versus the 1 point each team would have earned had the game ended in a tie.
 
 ```{r}
 goal_diff_plt
@@ -132,11 +127,11 @@ More comprehensively, we can see how all the teams standings in this division wo
 worst_rank_change_plt
 ```
 
-To be sure, we can't assume the games could be reasonably adjusted using this method, but instead propose the adjustment as a proxy for measuring one aspect of how ringers affect games. There are certainly other affects at play would be harder to measure, for example a defenseman playing in a league they are overqualified for is likely to shut down scoring for more novice players, but that impact wouldn't be directly observable on the score sheet.
+To be sure, we can't assume the games could be reasonably adjusted using this method, but instead propose the adjustment as a proxy for measuring one aspect of how ringers affect games. There are certainly other affects at play that would be harder to measure. For example a defenseman playing in a league they are overqualified for is likely to shut down scoring for more novice players, but that impact wouldn't be directly observable on the score sheet.
 
 ### How to address the problem
 
-The league already has a policy that is supposed to prevent players from playing on teams that span more than 2 division levels. Unfortunately, this rule hasn't been enforced, presumably because it's difficult identify the ringers in time to prevent them from playing.
+The league already has a policy against players from playing on teams that span more than 2 division levels. Unfortunately, this rule hasn't been enforced, presumably because it's difficult identify the ringers in time to prevent them from playing.
 
 This problem can be easily addressed using an app that scans past games (to identify ringers) and current game rosters to alert captains to potential issues. A proof-of-concept application has been developed for this purpose and is available [here](https://dsdaveh.shinyapps.io/siahl_ringers/):
 
@@ -158,6 +153,7 @@ To use it:
 * Enter a game number 
     * Games from the current season only (eg. 387361)
     * Game numbers can be seen from the SIAHL team pages
+    * (I plan to expand the UI to make games easier to find)
 * `Score` is the actual games score
 * `Adjusted` is the score if all goals involving ringers were removed
 * `Ringers` are a list of players who also play on teams in higher skilled (lower numbered) divisions more than 2 from division the current game is being played in
@@ -167,3 +163,7 @@ To use it:
 
 :::
 :::
+
+The practical application would be to allow captains, at any point in an active game, to protest an opposing player that should be disqualified to play at that level due to being on a roster in a more than 3 division-levels removed from the current game.
+
+Putting such a policy in place, would be a great first step to cleansing the league from the affects of players who corrupt the fairness principles inherent to sports, and would encourage novice players that who endeavour to learn the great sport of hockey as adults.
