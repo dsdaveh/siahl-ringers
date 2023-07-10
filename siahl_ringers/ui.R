@@ -22,8 +22,13 @@ f7Page(
             ),
             f7Row(
                 f7Col(uiOutput("start_time")),
-                f7Col(uiOutput("game_status")),
+                f7Col(), # leave this empty for alignment
                 f7Col(uiOutput("game_division"))
+            ),
+            f7Row(
+                f7Col(), # leave this empty for alignment
+                f7Col(uiOutput("game_status")),
+                f7Col() # leave this empty for alignment
             ),
             f7Row(
                 f7Col(style = flex3[1]), # leave this empty for alignment

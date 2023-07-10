@@ -121,9 +121,10 @@ shinyServer(function(input, output) {
                                else {"orange"}, 
                                "; padding: 5px; display: inline-block;",
                                " vertical-align: text-bottom;"),
-                game_status)
+                paste0("Game ", game_status))
         )
     })
+    
     
     output$game_division <- renderUI({
         req(game_data())
