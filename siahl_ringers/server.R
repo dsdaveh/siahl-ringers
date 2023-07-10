@@ -10,6 +10,12 @@ wlt_color <- function(score, comparison) {
     if (score < comparison) return("red")
     return("orange")
 }
+score_display <- function(score_number, score_color) {
+    div(style = "text-align: center;",
+        div(style = paste0("color: white; background-color: ", score_color,
+                           "; padding: 5px; display: inline-block;"),
+            score_number))
+}
 
 shinyServer(function(input, output) {
     game_data <- reactiveVal()
@@ -55,19 +61,11 @@ shinyServer(function(input, output) {
     
     output$away_team_score <- renderUI({
         req(game_data())
-        div(style = paste0("color: white; background-color: ", 
-                           if(game_data()$v_goals > game_data()$h_goals) {"green"} 
-                           else if(game_data()$v_goals < game_data()$h_goals) {"red"} 
-                           else {"orange"}, "; padding: 5px; display: inline-block;"),
-            game_data()$v_goals)
+        score_number <- game_data()$v_goals
+        score_color <- wlt_color(score_number, game_data()$h_goals)
+        score_display(score_number, score_color)
     })
     
-    score_display <- function(score_number, score_color) {
-        div(style = "text-align: center;",
-            div(style = paste0("color: white; background-color: ", score_color,
-                               "; padding: 5px; display: inline-block;"),
-                score_number))
-    }
     output$home_team_score <- renderUI({
         req(game_data())
         score_number <- game_data()$h_goals
@@ -76,26 +74,16 @@ shinyServer(function(input, output) {
     })    
     output$away_team_adj_info <- renderUI({
         req(game_data())
-        tagList(
-            div(style = paste0("color: white; background-color: ", 
-                               if(game_data()$vg_adj > game_data()$hg_adj) {"green"} 
-                               else if(game_data()$vg_adj < game_data()$hg_adj) {"red"} 
-                               else {"orange"}, 
-                               "; padding: 5px; display: inline-block; text-align: center;"
-                               ),
-                game_data()$vg_adj)
-        )
+        score_number <- game_data()$vg_adj
+        score_color <- wlt_color(score_number, game_data()$hg_adj)
+        score_display(score_number, score_color)
     })
     
     output$home_team_adj_info <- renderUI({
         req(game_data())
-        tagList(
-            div(style = paste0("color: white; background-color: ", 
-                               if(game_data()$hg_adj > game_data()$vg_adj) {"green"} 
-                               else if(game_data()$hg_adj < game_data()$vg_adj) {"red"} 
-                               else {"orange"}, "; padding: 5px; display: inline-block;"), 
-                game_data()$hg_adj)
-        )
+        score_number <- game_data()$hg_adj
+        score_color <- wlt_color(score_number, game_data()$vg_adj)
+        score_display(score_number, score_color)
     })
     
     output$score_label <- renderUI({
