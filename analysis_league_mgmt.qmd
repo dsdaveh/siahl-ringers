@@ -145,7 +145,7 @@ This problem can be easily addressed using an app that scans past and current ga
 
 ::: grid
 ::: g-col-4
-![](images/ringer_app_poc.png)
+[![Mobile friendly Shiny app](images/ringer_app_poc.png)](https://dsdaveh.shinyapps.io/siahl_ringers/)
 :::
 
 ::: g-col-8
