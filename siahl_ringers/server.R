@@ -17,9 +17,26 @@ score_display <- function(score_number, score_color) {
             score_number))
 }
 
-shinyServer(function(input, output) {
+shinyServer(function(input, output, session) {
     game_data <- reactiveVal()
     
+    # Get the game_id parameter from the URL
+    observe({
+        query <- parseQueryString(session$clientData$url_search)
+        game_id <- query[['game_id']]
+        
+        # Load game data if a valid game_id parameter is found
+        if (!is.null(game_id) && check_valid_game_id(game_id)) {
+            # Get the game info
+            game_info <- game_info(game_id)
+            
+            game_data(game_info)
+            # Set the input field to the current game_id
+            updateTextInput(session, "game_id", value = game_id)
+        }
+    })
+    
+    # Update game data when the submit button is clicked
     observeEvent(input$submit_btn, {
         game_id <- input$game_id
         
