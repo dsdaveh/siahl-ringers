@@ -28,11 +28,14 @@ shinyServer(function(input, output, session) {
         # Load game data if a valid game_id parameter is found
         if (!is.null(game_id) && check_valid_game_id(game_id)) {
             # Get the game info
+            withProgress(message = 'Fetching game data. Please wait...', value = 0, {
+                
             game_info <- game_info(game_id)
             
             game_data(game_info)
             # Set the input field to the current game_id
             updateTextInput(session, "game_id", value = game_id)
+            })
         }
     })
     

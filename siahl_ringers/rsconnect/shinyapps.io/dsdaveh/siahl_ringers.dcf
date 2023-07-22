@@ -5,10 +5,10 @@ account: dsdaveh
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 9432230
-bundleId: 7476252
+bundleId: 7484523
 url: https://dsdaveh.shinyapps.io/siahl_ringers/
-when: 1689797029.0616
-lastSyncTime: 1689797029.06162
+when: 1689985738.84539
+lastSyncTime: 1689985738.8454
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: dev_app_container.md|dev_app_container.Rmd|ln_siahl-eda-Current.qmd.RData|scorecards-Current.RDS|siahl-eda-Current.qmd.RData
