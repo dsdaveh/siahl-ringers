@@ -58,6 +58,9 @@ f7Page(
             f7Row(
                 f7Col(gt::gt_output("scoring"))
             ),
+            f7Row(
+                f7Col(uiOutput("explanation")),
+            ),
             verbatimTextOutput("update_time")
         )
     )

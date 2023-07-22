@@ -13,13 +13,13 @@ wlt_color <- function(score, comparison) {
 score_display <- function(score_number, score_color) {
     div(style = "text-align: center;",
         div(style = paste0("color: white; background-color: ", score_color,
-                           "; padding: 5px; display: inline-block;"),
+                           "; padding: 5px; display: inline-block; font-size: 4em"),
             score_number))
 }
 
 shinyServer(function(input, output, session) {
     game_data <- reactiveVal()
-    
+
     # Get the game_id parameter from the URL
     observe({
         query <- parseQueryString(session$clientData$url_search)
@@ -61,22 +61,22 @@ shinyServer(function(input, output, session) {
     
     output$away_header <- renderUI({
         req(game_data())
-        h4("Away", align = "center")
+        h3("Away", align = "center")
     })
     
     output$home_header <- renderUI({
         req(game_data())
-        h4("Home", align = "center")
+        h3("Home", align = "center")
     })
     
     output$away_team_name <- renderUI({
         req(game_data())
-        h5(game_data()$v_team, align = "center")
+        h3(game_data()$v_team, align = "center")
     })
     
     output$home_team_name <- renderUI({
         req(game_data())
-        h5(game_data()$h_team, align = "center")
+        h3(game_data()$h_team, align = "center")
     })
     
     output$away_team_score <- renderUI({
@@ -108,12 +108,12 @@ shinyServer(function(input, output, session) {
     
     output$score_label <- renderUI({
         req(game_data())
-        h6("Score", align = "right")
+        h4("Score", align = "right")
     })
     
     output$adjusted_label <- renderUI({
         req(game_data())
-        h6("Adjusted*", align = "right")
+        h4("Adjusted*", align = "right")
      })
     
     # Display the update time
@@ -127,7 +127,7 @@ shinyServer(function(input, output, session) {
         req(game_data())
         puck_drop = paste("Puck drop:", 
               format(game_data()$start_time, "%d-%b-%Y %H:%M %Z"))
-        h6(puck_drop)
+        h5(puck_drop)
     })
     
     # Display the game status
@@ -148,14 +148,14 @@ shinyServer(function(input, output, session) {
     
     output$game_division <- renderUI({
         req(game_data())
-        h6(game_data()$division)
+        h5(game_data()$division)
     })
     
     
     
     output$ringers_label <- renderUI({
         req(game_data())
-        h6("Ringers", align = "right")
+        h4("Ringers", align = "right")
     })
     
     gt_small_font <- function(x, ...) {gt(x, ...) %>% tab_options(table.font.size = "small")}
@@ -190,6 +190,14 @@ shinyServer(function(input, output, session) {
                 )
             )
     })
+    
+    output$explanation <- renderUI({
+        req(game_data())
+        p("*Adjusted Score is the result of removing goals
+          highlighted in yellow that involved players from the Ringers
+          list, based on their play in more advanced divisions.")
+    })
+    
     
     
 })

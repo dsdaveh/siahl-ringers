@@ -92,8 +92,8 @@ game_info <- function(game_id) {
         hdiff = h_goals - v_goals,
         hdiff_adj = hg_adj - vg_adj,
         
-        h_ringers = scorecard %>% get_ringers(home = TRUE) %>% select(`#`, Name),
-        v_ringers = scorecard %>% get_ringers(home = FALSE) %>% select(`#`, Name),
+        h_ringers = scorecard %>% get_ringers(home = TRUE) %>% select(`#`, Name, Div),
+        v_ringers = scorecard %>% get_ringers(home = FALSE) %>% select(`#`, Name, Div),
         
         scoring = scorecard %>% construct_scoring_table()
   
@@ -163,7 +163,10 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
         
     playing <- scorecard_players(box_score, home = home) %>% 
         filter(P != 'G') %>%  # remove goalie
-        mutate(match_name = map_chr(Name, match_player_name, team_roster))
+        mutate(match_name = map_chr(Name, match_player_name, team_roster)) %>% 
+        left_join(player_stats %>% select(match_name = Name, Div = ringer_level), by = 'match_name') %>% 
+        unique() 
+
     
     if (any(playing$match_name == "<NOT_FOUND>")) {
         unmatched = character()
