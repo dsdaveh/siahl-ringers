@@ -195,7 +195,7 @@ shinyServer(function(input, output, session) {
         req(game_data())
         p("*Adjusted Score is the result of removing goals
           highlighted in yellow that involved players from the Ringers
-          list, based on their play in more advanced divisions.")
+          list, based on their play in more advanced divisions (see Div column).")
     })
     
     
