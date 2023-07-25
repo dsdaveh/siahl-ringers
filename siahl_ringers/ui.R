@@ -10,6 +10,10 @@ f7Page(
         theme = "ios",
         dark = FALSE,
         color = "teal"),
+    tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/custom.css")
+    ),
+    
     f7SingleLayout(
         navbar = f7Navbar(title = "Hockey Game Ringer Effects", color = "blue"),
         f7Card(

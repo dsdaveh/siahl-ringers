@@ -1,0 +1,6 @@
+.shiny-progress {
+  top: 10px; /* adjust this value as needed */
+  right: 10px;
+  bottom: auto;
+  left: auto;
+}
