@@ -157,7 +157,7 @@ shinyServer(function(input, output, session) {
             out_adj <- wlt_outcome(hg_adj, vg_adj)
             if (hgoals == hg_adj && 
                 vgoals == vg_adj) {
-                msg <- "No ringer affect"
+                msg <- "No discoveable ringer affect"
                 fcol <- "green"
             } else if(outcome == out_adj) {
                 msg <- "Ringer scoring did not affect standings points"
