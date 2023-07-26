@@ -12,3 +12,9 @@ for(gid in names(affected_scorecards)) {
     if (! gid %in% affected_game_ids) affected_scorecards[[gid]] <- NULL
 }
 saveRDS(affected_scorecards, file = "siahl_ringers/scorecards.RDS" )
+
+affected_games <- games_adj %>% 
+    filter(adj_effect) %>% 
+    mutate(n_ringer_goals = h_goals + v_goals - hg_adj - hg_adj) %>% 
+    arrange(-n_ringer_goals)
+write_csv(affected_games, file = "affected_games.csv")
