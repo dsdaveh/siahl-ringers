@@ -1,6 +1,9 @@
 ## run all chunks in siahl-etl.qmd
 ## run all chunks in siahl-eda.qmd
 
+
+## App deployment -- ignore warnings
+
 library(here)
 setwd("~/Documents/GitHub/siahl-ringers-branch")
 load(here("siahl-eda-Current.qmd.RData"))

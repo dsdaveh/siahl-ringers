@@ -164,7 +164,7 @@ shinyServer(function(input, output, session) {
                 fcol <- "black"
             } else {
                 msg <- sprintf("Ringers impacted the standings by flipping the home team 
-                               (%s) from %s to a %s",
+                               (%s) from a %s to a %s",
                                game_data()$h_team, outcome, out_adj)
                 fcol <- "red"
             }
@@ -174,7 +174,7 @@ shinyServer(function(input, output, session) {
         tagList(
             div(style = paste0("color: ", 
                                fcol, 
-                               "; padding: 5px; display: inline-block;",
+                               "; text-align: center; padding: 5px; display: inline-block;",
                                " vertical-align: text-bottom;"),
                 msg)
         )

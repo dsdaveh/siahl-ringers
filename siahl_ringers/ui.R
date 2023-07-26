@@ -32,7 +32,7 @@ f7Page(
             f7Row(
                 f7Col(), # leave this empty for alignment
                 f7Col(uiOutput("game_status")),
-                f7Col(uiOutput("affect")) 
+                f7Col() # leave this empty for alignment
             ),
             f7Row(
                 f7Col(style = flex3[1]), # leave this empty for alignment
@@ -45,11 +45,18 @@ f7Page(
                 f7Col(uiOutput("home_team_name"), style = flex3[3])
             ),
             f7Row(
+                class = "row-flex",
                 f7Col(style = flex3[1], uiOutput("score_label")),
                 f7Col(style = flex3[2], uiOutput("away_team_score")),
                 f7Col(style = flex3[3], uiOutput("home_team_score"))
             ),
+            
             f7Row(
+                f7Col(uiOutput("affect")) 
+            ),
+            
+            f7Row(
+                class = "row-flex",
                 f7Col(uiOutput("adjusted_label"), style = flex3[1]),
                 f7Col(uiOutput("away_team_adj_info"), style = flex3[2]),
                 f7Col(uiOutput("home_team_adj_info"), style = flex3[3])
