@@ -10,6 +10,10 @@ f7Page(
         theme = "ios",
         dark = FALSE,
         color = "teal"),
+    tags$head(
+        tags$link(rel = "stylesheet", type = "text/css", href = "www/custom.css")
+    ),
+    
     f7SingleLayout(
         navbar = f7Navbar(title = "Hockey Game Ringer Effects", color = "blue"),
         f7Card(
@@ -41,11 +45,18 @@ f7Page(
                 f7Col(uiOutput("home_team_name"), style = flex3[3])
             ),
             f7Row(
+                class = "row-flex",
                 f7Col(style = flex3[1], uiOutput("score_label")),
                 f7Col(style = flex3[2], uiOutput("away_team_score")),
                 f7Col(style = flex3[3], uiOutput("home_team_score"))
             ),
+            
             f7Row(
+                f7Col(uiOutput("affect")) 
+            ),
+            
+            f7Row(
+                class = "row-flex",
                 f7Col(uiOutput("adjusted_label"), style = flex3[1]),
                 f7Col(uiOutput("away_team_adj_info"), style = flex3[2]),
                 f7Col(uiOutput("home_team_adj_info"), style = flex3[3])

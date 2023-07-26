@@ -175,8 +175,8 @@ for (iteam in 1:nrow(teams)) {
 Save files to disk
 
 ```{r}
-player_file = sprintf("player_stats-%s-%s.RDS", season, now())
-games_file = sprintf("games_stats-%s-%s.RDS", season, now())
+player_file = sprintf("player_stats-%s.RDS", season)
+games_file = sprintf("games_stats-%s.RDS", season)
 saveRDS(players, file = player_file)
 saveRDS(all_games, file = games_file)
 saveRDS(seasons, file = season_file)

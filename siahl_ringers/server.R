@@ -145,6 +145,41 @@ shinyServer(function(input, output, session) {
         )
     })
     
+    # Display the game status
+    output$affect <- renderUI({
+        req(game_data())
+        if(game_data()$game_status == "Completed") {
+            hgoals <- game_data()$h_goals
+            vgoals <- game_data()$v_goals
+            hg_adj <- game_data()$hg_adj
+            vg_adj <- game_data()$vg_adj
+            outcome <- wlt_outcome(hgoals, vgoals)
+            out_adj <- wlt_outcome(hg_adj, vg_adj)
+            if (hgoals == hg_adj && 
+                vgoals == vg_adj) {
+                msg <- "No discoveable ringer affect"
+                fcol <- "green"
+            } else if(outcome == out_adj) {
+                msg <- "Ringer scoring did not affect standings points"
+                fcol <- "black"
+            } else {
+                msg <- sprintf("Ringers impacted the standings by flipping the home team 
+                               (%s) from a %s to a %s",
+                               game_data()$h_team, outcome, out_adj)
+                fcol <- "red"
+            }
+        } else {
+            msg <- " "
+        }
+        tagList(
+            div(style = paste0("color: ", 
+                               fcol, 
+                               "; text-align: center; padding: 5px; display: inline-block;",
+                               " vertical-align: text-bottom;"),
+                msg)
+        )
+    })
+    
     
     output$game_division <- renderUI({
         req(game_data())
@@ -197,7 +232,5 @@ shinyServer(function(input, output, session) {
           highlighted in yellow that involved players from the Ringers
           list, based on their play in more advanced divisions (see Div column).")
     })
-    
-    
-    
 })
+

@@ -65,9 +65,12 @@ game_info <- function(game_id) {
                            base_url ,str_extract(game_id, '\\d+')) 
         scorecard <- game_url %>% read_html() %>% as.character()
         update_time <- now()
+        scorecards[[game_id]] <<- scorecard 
+        message('retrieve game from web ', game_id)
     } else {
         scorecard <- scorecards[[game_id]]
         update_time <- ifelse(exists('mtime'), mtime, NA_POSIXct_) %>% as.POSIXct()
+        message('lookup cached game info ', game_id)
     }
 
     #return
@@ -224,7 +227,8 @@ scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE,
         janitor::clean_names() %>% 
         filter(! goal %in% ringers,
                ! ass %in% ringers,
-               ! ass_2 %in% ringers)
+               ! ass_2 %in% ringers) %>% 
+        mutate(time = ifelse(str_detect(time, ':'), time, "00:01")) # round to last second
 }
 
 #scoresheet division entry is not always consistent with web site (eg. 7B vs 7B West)
@@ -383,4 +387,10 @@ get_season_teams <- function(sid, verbose = 1) {
     teams%>% 
         mutate(season_id = sid,
                season_name = season_name)
+}
+
+wlt_outcome <- function(score, comparison) {
+    if (score > comparison) return("Win")
+    if (score < comparison) return("Loss")
+    return("Tie")
 }

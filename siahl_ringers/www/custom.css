@@ -1,0 +1,12 @@
+.shiny-progress {
+  top: 10px; /* adjust this value as needed */
+  right: 30px;
+  bottom: auto;
+  left: auto;
+}
+
+.row-flex {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+}
