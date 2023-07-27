@@ -13,6 +13,7 @@ The context of the project is intentionally uncontroversial and broad, involving
     * `Quarto` docs
 * Data Acquisition 
     * Web scraping : `rvest`
+    * ETL
 * Exploratory Data Analysis & Data Visualization 
 * Analytical Methods 
 * Interactive Data Product Development - early prototype
