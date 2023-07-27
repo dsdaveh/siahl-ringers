@@ -3,20 +3,19 @@
 
 
 ## App deployment -- ignore warnings
-setwd("~/Documents/GitHub/siahl-ringers-branch")
 
 library(here)
-source('siahl-utils.R')
+source(here('siahl-utils.R'))
 
 load(here("siahl-eda-Current.qmd.RData"))
-saveRDS(all_teams, file = "siahl_ringers/all_teams.RDS" )
+saveRDS(all_teams, file = here("siahl_ringers/all_teams.RDS" ))
 
 affected_game_ids <- games_adj %>% filter(adj_effect) %>% pull(Game)
 affected_scorecards <- scorecards
 for(gid in names(affected_scorecards)) {
     if (! gid %in% affected_game_ids) affected_scorecards[[gid]] <- NULL
 }
-saveRDS(affected_scorecards, file = "siahl_ringers/scorecards.RDS" )
+saveRDS(affected_scorecards, file = here("siahl_ringers/scorecards.RDS" ))
 
 affected_games <- games_adj %>% 
     filter(adj_effect) %>% 

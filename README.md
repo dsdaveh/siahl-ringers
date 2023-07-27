@@ -24,7 +24,9 @@ To quickly get a feel for the project context, refer to this [open letter to Sha
 ## Data Products
 
 * [open letter to Sharks Ice Adult Hockey League Management](https://rpubs.com/dsdaveh/1061410) 
-* [Mobile App for Game Status](https://dsdaveh.shinyapps.io/siahl_ringers/?game_id=387361) - Early stage prototype 
+* Mobile App for Game Status - Early stage prototype : 
+    * [View from mobile phone ](https://dsdaveh.shinyapps.io/siahl_ringers/?game_id=387361) 
+    * [View from web browser (simulated iphone)](https://dsdaveh.github.io/siahl-ringers/)
 
 
 ## Data Source
