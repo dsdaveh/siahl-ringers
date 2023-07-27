@@ -6,15 +6,24 @@ This project is a public portfolio project that is still in an embryonic phase.
 
 The project is intended to create a framework for examples of data science workflows that a complex project might typically require as well as a gallery of artifacts.
 
-The context of the project surrounds an existing adult hockey league in Norther California with a public web site that displays several decades of data from games played on a daily basis.
+The context of the project is intentionally uncontroversial and broad, involving an existing adult hockey league in Norther California with a public web site that displays several decades of data from games played on a daily basis.
 
+### Process and Frameworks used
 * Problem Definition / Stakeholder Communication 
+    * `Quarto` docs
 * Data Acquisition 
-* Exploratory Data Analysis 
-* Data Visualization 
+    * Web scraping : `rvest`
+* Exploratory Data Analysis & Data Visualization 
 * Analytical Methods 
 * Interactive Data Product Development - early prototype
+    * mobile app: `shinymobile`
+    * `CSS` for demo 
 * Production Deployment - not started 
+    * automated data refresh
+    * code refactoring into packages for maintenance
+    * automated deployment
+    
+    
 
 
 ## TL;DR
