@@ -163,8 +163,8 @@ shinyServer(function(input, output, session) {
                 msg <- "Ringer scoring did not affect standings points"
                 fcol <- "black"
             } else {
-                msg <- sprintf("Ringers impacted the standings by flipping the home team 
-                               (%s) from a %s to a %s",
+                msg <- sprintf("Ringers affected the outcome of this game. The Adjusted score (ringer involved goals removed) implies that, without ringers, 
+                                the home team (%s)  %s would have changed to a %s",
                                game_data()$h_team, outcome, out_adj)
                 fcol <- "red"
             }
