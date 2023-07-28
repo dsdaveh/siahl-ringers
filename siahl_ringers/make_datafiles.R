@@ -31,6 +31,7 @@ example_games <- character()
 for (i in 1:7) {
     game <- affected_games[i, ]
     item_html <- template_line %>% 
+        str_replace_all('GAMEID', game$Game) %>% 
         str_replace('HOME_TEAM', game$Home) %>% 
         str_replace('AWAY_TEAM', game$Away) %>% 
         str_replace('OUTCOME', wlt_outcome(game$h_goals, game$v_goals)) %>% 
