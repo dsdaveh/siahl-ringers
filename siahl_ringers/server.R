@@ -165,9 +165,16 @@ shinyServer(function(input, output, session) {
             } else {
                 msg <- div(
                     p(strong("Ringers affected the outcome of this game."),
-                      sprintf("The Adjusted score (ringer involved goals removed) implies that, without ringers, 
-                              the home team (%s)  %s would have changed to a %s.",
-                               game_data()$h_team, outcome, out_adj)))
+                      "The Adjusted score indicates the home team ",
+                      strong(game_data()$h_team), 
+                      strong(outcome),
+                      "would have changed to a ",
+                      strong(out_adj),
+                      "." )
+                )
+                      # sprintf("The Adjusted score (ringer involved goals removed) implies that, without ringers, 
+                      #         the home team (%s)  %s would have changed to a %s.",
+                      #          game_data()$h_team, outcome, out_adj)))
         
                 fcol <- "red"
             }
