@@ -141,7 +141,7 @@ To be sure, we can't assume the games could be reasonably adjusted using this me
 
 The league already has a policy against players playing on teams that span more than 2 division levels. Unfortunately, this rule hasn't been enforced, presumably because it's difficult to identify the ringers in time to prevent them from playing.
 
-This problem can be easily addressed using an app that scans past and current game rosters to alert captains to potential violations. A proof-of-concept application has been developed for this purpose and is available [here](https://dsdaveh.shinyapps.io/siahl_ringers/):
+This problem can be easily addressed using an app that scans past and current game rosters to alert captains to potential violations. A proof-of-concept application has been developed for this purpose.
 
 ::: grid
 ::: g-col-4
@@ -149,9 +149,9 @@ This problem can be easily addressed using an app that scans past and current ga
 :::
 
 ::: g-col-8
-<span style="color:red;"> *NOTE*: This is app is currently pre-alpha, and should only be used to get an idea for what is possible.</span>
+[*NOTE*: This is app is currently pre-alpha, and should only be used to get an idea for what is possible.]{style="color:red;"}
 
-It is best viewed on an iPhone, but a simulation is available at <https://dsdaveh.github.io/siahl-ringers/>
+It is best viewed on an iPhone, but a simulation with example game links is available at <https://dsdaveh.github.io/siahl-ringers/>. To view the app directly from a mobile device click [here](https://dsdaveh.shinyapps.io/siahl_ringers/):
 
 To use it:
 
