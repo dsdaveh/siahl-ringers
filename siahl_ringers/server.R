@@ -216,9 +216,23 @@ shinyServer(function(input, output, session) {
     # Display the start time
     output$start_time <- renderUI({
         req(game_data())
-        puck_drop = paste("Puck drop:", 
-              format(game_data()$start_time, "%d-%b-%Y %H:%M %Z"))
-        h5(puck_drop)
+        tagList(
+            div(style = " vertical-align: text-top;",
+                strong("Puck drop:"), 
+                br(),
+                format(game_data()$start_time, "%d-%b-%Y %H:%M %Z")) 
+        )        
+    })
+    
+    # display division
+    output$game_division <- renderUI({
+        req(game_data())
+        tagList(
+            div(style = " vertical-align: text-top;",
+                strong("Division:"), 
+                br(),
+                game_data()$division) 
+        )        
     })
     
     # Display the game status
@@ -280,14 +294,6 @@ shinyServer(function(input, output, session) {
                 msg)
         )
     })
-    
-    
-    output$game_division <- renderUI({
-        req(game_data())
-        h5(game_data()$division)
-    })
-    
-    
     
     output$ringers_label <- renderUI({
         req(game_data())

@@ -31,20 +31,16 @@ f7Page(
         f7Card(
             f7Row(
                 f7Col(
-                    f7Text(inputId = "game_id", label = "Game ID", placeholder = "Enter Game ID"),
+                    f7Text(inputId = "game_id", label = "Game ID", placeholder = "Enter Game ID or select below"),
                     f7Button(inputId = "submit_btn", label = "Submit", fill = TRUE, color = "blue"),
                     width = 12
                 )
             ),
+            f7Row(tags$small(".", style = "color: white")),
             f7Row(
                 f7Col(uiOutput("start_time")),
-                f7Col(), # leave this empty for alignment
-                f7Col(uiOutput("game_division"))
-            ),
-            f7Row(
-                f7Col(), # leave this empty for alignment
                 f7Col(uiOutput("game_status")),
-                f7Col() # leave this empty for alignment
+                f7Col(uiOutput("game_division"))
             ),
             f7Row(
                 f7Col(uiOutput("affect")) 
@@ -95,6 +91,13 @@ f7Page(
             f7Row(
                 selectInput("team_games", "(optional) Select from games by team", width = '100%',
                             choices = c("Choose Division/Team", teams$div_team)
+                )
+            ),
+            f7Row(
+                f7Col(
+                    tags$p("For more context about this app, see"),
+                    tags$a("An open letter to Sharks Ice Adult Hockey League Management",
+                           href = "http://rpubs.com/dsdaveh/ringerwip")
                 )
             )
         )
