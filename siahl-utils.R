@@ -52,7 +52,7 @@ game_info <- function(game_id) {
         # rdata_file <- "siahl-eda-Current.qmd.RData"
         # load(rdata_file, .GlobalEnv)
         scorecards <<- readRDS('scorecards.RDS')
-        all_teams <<- readRDS('all_teams.RDS')
+        all_teams <<- readRDS('all_teams-Current.RDS')
         
         # mtime <<- file.mtime(rdata_file)
         mtime <<- file.mtime('scorecards.RDS')

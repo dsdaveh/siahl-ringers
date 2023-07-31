@@ -19,10 +19,12 @@ score_display <- function(score_number, score_color) {
 }
 
 # move this to sourced file (must be identical to ui.R)
-all_teams <- readRDS(file = "all_teams.RDS")
+all_teams <- readRDS(file = "all_teams-Current.RDS")
 teams <- all_teams %>% 
     count(Division, Team) %>% 
     mutate(div_team = paste("Division", Division, "-", Team)) 
+
+all_games <- readRDS(file = "games_stats-Current.RDS")
 
 
 shinyServer(function(input, output, session) {
@@ -49,8 +51,8 @@ shinyServer(function(input, output, session) {
     
     # Update game data when the an example game is chosen
     observeEvent(input$example_game, {
+        if (input$example_game == "not_selected") return()
         game_id <- input$example_game
-        if (game_id == "") return()
         
         # Progress message
         withProgress(message = 'Fetching game data. Please wait...', value = 0, {
@@ -69,6 +71,50 @@ shinyServer(function(input, output, session) {
                 f7Dialog(title = "Invalid Game ID", text = "You shouldn't see this error here :( Please enter a valid game ID.")
             }
         })
+    })
+    
+    # Update game data when the an example game is chosen
+    observeEvent(input$team_games, {
+        if(input$team_games == "Choose Division/Team") return()
+        
+        #if selection is a team name - then we populate
+        if (str_detect(input$team_games, "Division.* - ")) {
+            team <- teams %>% filter(div_team == input$team_games)
+            stopifnot(nrow(team) == 1)
+            
+            new_menu <- c(input$team_games, "Select different team")
+            
+            updateSelectInput(session, "team_games",
+                              choices = new_menu)
+            
+            
+            
+        } else if(input$team_games == "Select different team") {
+            updateSelectInput(session, "team_games",
+                              choices = c("Choose Division/Team", teams$div_team)
+            )
+        }
+        
+        # game_id <- input$example_game
+        # if (game_id == "") return()
+        # 
+        # # Progress message
+        # withProgress(message = 'Fetching game data. Please wait...', value = 0, {
+        #     
+        #     # Check if game_id is valid
+        #     if(check_valid_game_id(game_id)) {
+        #         # Get the game info
+        #         game_info <- game_info(game_id)
+        #         
+        #         game_data(game_info)
+        #         # Set the input field to the current game_id
+        #         updateTextInput(session, "game_id", value = game_id)
+        #         
+        #     } else {
+        #         game_data(NULL)
+        #         f7Dialog(title = "Invalid Game ID", text = "You shouldn't see this error here :( Please enter a valid game ID.")
+        #     }
+        # })
     })
     
     # Update game data when the submit button is clicked

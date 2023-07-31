@@ -1,6 +1,18 @@
 library(shiny)
 library(shinyMobile)
 library(gt)
+library(tidyverse)
+
+eg_games <- read_csv('affected_games.csv', show_col_types = FALSE) %>% 
+    head(10) %>% 
+    mutate(game_label = sprintf("Game %s %s vs %s (Home)  %d goals involving ringers",
+                                Game, Away, Home, n_ringer_goals)
+    )
+
+all_teams <- readRDS(file = "all_teams-Current.RDS")
+teams <- all_teams %>% 
+    count(Division, Team) %>% 
+    mutate(div_team = paste("Division", Division, "-", Team)) 
 
 flex3 <- c("flex: 2;", "flex: 5;", "flex: 5;" )
 
@@ -68,9 +80,23 @@ f7Page(
                 f7Col(gt::gt_output("scoring"))
             ),
             f7Row(
-                f7Col(uiOutput("explanation")),
+                f7Col(uiOutput("explanation"))
             ),
-            verbatimTextOutput("update_time")
+            f7Row(
+                f7Col(verbatimTextOutput("update_time"))
+            ),
+            f7Row(
+                selectInput("example_game", "(optional) Example Games", width = '100%',
+                            choices = setNames(
+                                c("not_selected", eg_games$Game), 
+                                c("Choose from examples of ringer influenced games", eg_games$game_label)) 
+                )
+            ),
+            f7Row(
+                selectInput("team_games", "(optional) Select from games by team", width = '100%',
+                            choices = c("Choose Division/Team", teams$div_team)
+                )
+            )
         )
     )
 )
