@@ -2,6 +2,7 @@
 library(shiny)
 library(shinyMobile)
 library(gt)
+library(tidyverse)
 
 source('siahl-utils.R')
 
@@ -16,6 +17,13 @@ score_display <- function(score_number, score_color) {
                            "; padding: 5px; display: inline-block; font-size: 4em"),
             score_number))
 }
+
+# move this to sourced file (must be identical to ui.R)
+all_teams <- readRDS(file = "all_teams.RDS")
+teams <- all_teams %>% 
+    count(Division, Team) %>% 
+    mutate(div_team = paste("Division", Division, "-", Team)) 
+
 
 shinyServer(function(input, output, session) {
     game_data <- reactiveVal()
@@ -37,6 +45,30 @@ shinyServer(function(input, output, session) {
             updateTextInput(session, "game_id", value = game_id)
             })
         }
+    })
+    
+    # Update game data when the an example game is chosen
+    observeEvent(input$example_game, {
+        game_id <- input$example_game
+        if (game_id == "") return()
+        
+        # Progress message
+        withProgress(message = 'Fetching game data. Please wait...', value = 0, {
+            
+            # Check if game_id is valid
+            if(check_valid_game_id(game_id)) {
+                # Get the game info
+                game_info <- game_info(game_id)
+                
+                game_data(game_info)
+                # Set the input field to the current game_id
+                updateTextInput(session, "game_id", value = game_id)
+                
+            } else {
+                game_data(NULL)
+                f7Dialog(title = "Invalid Game ID", text = "You shouldn't see this error here :( Please enter a valid game ID.")
+            }
+        })
     })
     
     # Update game data when the submit button is clicked
