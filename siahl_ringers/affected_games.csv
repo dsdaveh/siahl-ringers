@@ -1,0 +1,36 @@
+Team,Division,Game,Home,Away,Home Goals,Away Goals,home,shootout,home_diff,h_goals,v_goals,hg_adj,vg_adj,hdiff_adj,hpts,hpts_adj,adj_effect,n_ringer_goals
+OHC 2,7A,392059*,OHC 2,Bandits 2,6,6,1,0,0,6,6,1,4,-3,1,0,TRUE,10
+Hooligans,6A,387361*,Hooligans,SJ Sofa Kings,7,5,1,0,2,7,5,2,5,-3,2,0,TRUE,8
+Bandits 2,7A,392586*,Bandits 2,Hectors Pool Service,8,5,1,0,3,8,5,3,5,-2,2,0,TRUE,7
+Hooligans,6A,386226*,Hooligans,Team America,7,4,1,0,3,7,4,3,4,-1,2,0,TRUE,5
+3rd Line Scrubs,7B East,392061*,3rd Line Scrubs,Team Beer,4,1,1,0,3,4,1,0,1,-1,2,0,TRUE,5
+OHC 2,7A,389046*,OHC 2,Beaver Dragons,4,5,1,1,-1,4,4,2,4,-2,1,0,TRUE,4
+Fighting Icecocks 2,7B West,382928*,Fighting Icecocks 2,Red Hawks,4,3,1,1,1,3,3,1,3,-2,1,0,TRUE,4
+Taquieria Con Carne,5B,388604*,Taquieria Con Carne,EDWS,3,6,1,0,-3,3,6,3,3,0,0,1,TRUE,3
+Red Dragons,7A,386292*,Red Dragons,Hectors Pool Service,4,3,1,0,1,4,3,2,3,-1,2,0,TRUE,3
+Red Dragons,7A,388663*,Red Dragons,OHC 2,2,5,1,0,-3,2,5,2,2,0,0,1,TRUE,3
+BK 10,8B,382989*,BK 10,Habs,6,3,1,0,3,6,3,3,3,0,2,1,TRUE,3
+Norcal Crossover Batalion,5B,392658*,Norcal Crossover Batalion,EDWS,4,6,1,0,-2,4,6,4,2,2,0,2,TRUE,2
+The Fruit Company,6A,392079*,The Fruit Company,Hooligans,2,4,1,0,-2,2,4,2,2,0,0,1,TRUE,2
+Irish Car Bombs 2,6A,387558*,Irish Car Bombs 2,Cereal Killers,3,5,1,0,-2,3,5,3,3,0,0,1,TRUE,2
+Blade Runners,6B,387559*,Blade Runners,Seal Team Sticks,1,3,1,0,-2,1,3,1,0,1,0,2,TRUE,2
+Royals 2,6B,389289*,Royals 2,Raccoons,5,3,1,0,2,5,3,3,3,0,2,1,TRUE,2
+Royals 3,7A,389793*,Royals 3,Red Dragons,6,6,1,0,0,6,6,5,4,1,1,2,TRUE,2
+Gang Green,7A,386032*,Gang Green,Royals 3,2,3,1,1,-1,2,2,1,2,-1,1,0,TRUE,2
+Gang Green,7A,392063*,Gang Green,Red Dragons,4,5,1,1,-1,4,4,3,2,1,1,2,TRUE,2
+Irish Car Bombs 4,8A,386101*,Irish Car Bombs 4,Ice Badgers,4,3,1,1,1,3,3,2,3,-1,1,0,TRUE,2
+Cant Skate Wont Skate,8A,385154*,Cant Skate Wont Skate,Thresher Sharks 2,3,3,1,0,0,3,3,2,3,-1,1,0,TRUE,2
+Mermen Too,5A,387755*,Mermen Too,Nuggets,5,6,1,0,-1,5,6,5,4,1,0,2,TRUE,1
+Hooligans,6A,387295*,Hooligans,Bandits 1,2,1,1,0,1,2,1,1,1,0,2,1,TRUE,1
+Hooligans,6A,388616*,Hooligans,Rogue Squadron,4,3,1,0,1,4,3,3,3,0,2,1,TRUE,1
+Leftovers,6B,389855*,Leftovers,Seal Team Sticks,3,4,1,0,-1,3,4,3,1,2,0,2,TRUE,1
+Flying Pandas,7B West,390319*,Flying Pandas,Seal Team Sticks 2,3,4,1,0,-1,3,4,3,3,0,0,1,TRUE,1
+Unhealthy Scratch,8B,389792*,Unhealthy Scratch,Rebels,4,5,1,0,-1,4,5,4,4,0,0,1,TRUE,1
+Blackhawks,5A,385157*,Blackhawks,Nuggets,6,5,1,1,1,5,5,5,4,1,1,2,TRUE,0
+Time Lords,5B,385562*,Time Lords,EDWS,6,6,1,0,0,6,6,6,3,3,1,2,TRUE,0
+Irish Car Bombs 2,6A,389308*,Irish Car Bombs 2,Cereal Killers,5,4,1,1,1,4,4,4,2,2,1,2,TRUE,0
+Irish Car Bombs 3,7A,389374*,Irish Car Bombs 3,Royals 3,3,3,1,0,0,3,3,3,2,1,1,2,TRUE,0
+Cant Score Wont Score,7A,386220*,Cant Score Wont Score,Bandits 2,2,3,1,1,-1,2,2,2,0,2,1,2,TRUE,0
+Stiflers Mom 1,8A,386288*,Stiflers Mom 1,Cant Skate Wont Skate,4,4,1,0,0,4,4,4,3,1,1,2,TRUE,0
+Rebel Scum 3,8B,389227*,Rebel Scum 3,BK 10,2,3,1,1,-1,2,2,2,0,2,1,2,TRUE,0
+Chiefs 4,8B,385486*,Chiefs 4,Rebels,3,4,1,1,-1,3,3,3,1,2,1,2,TRUE,0
