@@ -5,10 +5,10 @@ account: dsdaveh
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 9432230
-bundleId: 7507700
+bundleId: 7516664
 url: https://dsdaveh.shinyapps.io/siahl_ringers/
-when: 1690573099.06622
-lastSyncTime: 1690573099.06624
+when: 1690848180.47796
+lastSyncTime: 1690848180.47798
 asMultiple: FALSE
 asStatic: FALSE
-ignoredFiles: make_datafiles.R
+ignoredFiles: make_datafiles.R|server_mystery.R

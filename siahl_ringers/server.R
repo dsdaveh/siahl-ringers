@@ -152,23 +152,34 @@ shinyServer(function(input, output, session) {
     
     output$away_header <- renderUI({
         req(game_data())
-        h3("Away", align = "center")
+        "Away"
     })
     
     output$home_header <- renderUI({
         req(game_data())
-        h3("Home", align = "center")
+        "Home"
     })
     
     output$away_team_name <- renderUI({
         req(game_data())
-        h3(game_data()$v_team, align = "center")
+        game_data()$v_team
     })
     
     output$home_team_name <- renderUI({
         req(game_data())
-        h3(game_data()$h_team, align = "center")
+        game_data()$h_team
     })
+    
+    
+    # output$away_team_name <- renderUI({
+    #     req(game_data())
+    #     h3(game_data()$v_team, align = "center")
+    # })
+    # 
+    # output$home_team_name <- renderUI({
+    #     req(game_data())
+    #     h3(game_data()$h_team, align = "center")
+    # })
     
     output$away_team_score <- renderUI({
         req(game_data())
@@ -199,12 +210,12 @@ shinyServer(function(input, output, session) {
     
     output$score_label <- renderUI({
         req(game_data())
-        h4("Score", align = "right")
+        "Score"
     })
     
     output$adjusted_label <- renderUI({
         req(game_data())
-        h4("Adjusted*", align = "right")
+        "Adj* Score"
      })
     
     # Display the update time
@@ -296,8 +307,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$ringers_label <- renderUI({
-        req(game_data())
-        h4("Ringers", align = "right")
+        "Ringers"
     })
     
     gt_small_font <- function(x, ...) {gt(x, ...) %>% tab_options(table.font.size = "small")}

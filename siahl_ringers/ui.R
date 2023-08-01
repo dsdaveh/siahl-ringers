@@ -23,7 +23,7 @@ f7Page(
         dark = FALSE,
         color = "teal"),
     tags$head(
-        tags$link(rel = "stylesheet", type = "text/css", href = "www/custom.css")
+        tags$link(rel = "stylesheet", type = "text/css", href = "custom.css")
     ),
     
     f7SingleLayout(
@@ -36,7 +36,7 @@ f7Page(
                     width = 12
                 )
             ),
-            f7Row(tags$small(".", style = "color: white")),
+            f7Row(tags$small(".", style = "color: white")), #vertical spacing
             f7Row(
                 f7Col(uiOutput("start_time")),
                 f7Col(uiOutput("game_status")),
@@ -45,30 +45,32 @@ f7Page(
             f7Row(
                 f7Col(uiOutput("affect")) 
             ),
+
             f7Row(
                 f7Col(style = flex3[1]), # leave this empty for alignment
-                f7Col(uiOutput("away_header"), style = flex3[2]),
-                f7Col(uiOutput("home_header"), style = flex3[3])
+                f7Col(uiOutput("away_header"), style = flex3[2], class = "team-header"),
+                f7Col(uiOutput("home_header"), style = flex3[3], class = "team-header")
             ),
             f7Row(
                 f7Col(style = flex3[1]), # leave this empty for alignment
-                f7Col(uiOutput("away_team_name"), style = flex3[2]),
-                f7Col(uiOutput("home_team_name"), style = flex3[3])
+                f7Col(uiOutput("away_team_name"), style = flex3[2], class = "team-name"),
+                f7Col(uiOutput("home_team_name"), style = flex3[3], class = "team-name")
             ),
             f7Row(
                 class = "row-flex",
-                f7Col(style = flex3[1], uiOutput("score_label")),
+                f7Col(style = flex3[1], uiOutput("score_label"), class = "col-label"),
                 f7Col(style = flex3[2], uiOutput("away_team_score")),
                 f7Col(style = flex3[3], uiOutput("home_team_score"))
             ),
+            f7Row(tags$small(".", style = "color: white")), #vertical spacing
             f7Row(
                 class = "row-flex",
-                f7Col(uiOutput("adjusted_label"), style = flex3[1]),
+                f7Col(uiOutput("adjusted_label"), style = flex3[1], class = "col-label"),
                 f7Col(uiOutput("away_team_adj_info"), style = flex3[2]),
                 f7Col(uiOutput("home_team_adj_info"), style = flex3[3])
             ),
             f7Row(
-                f7Col(uiOutput("ringers_label"), style = flex3[1]),
+                f7Col(uiOutput("ringers_label"), style = flex3[1], class = "col-label"),
                 f7Col(gt::gt_output("away_team_ringers"), style = flex3[2]),
                 f7Col(gt::gt_output("home_team_ringers"), style = flex3[3])
             ),
