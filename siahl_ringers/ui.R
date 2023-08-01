@@ -57,7 +57,6 @@ f7Page(
                 f7Col(uiOutput("home_team_name"), style = flex3[3], class = "team-name")
             ),
             f7Row(
-                class = "row-flex",
                 f7Col(style = flex3[1], uiOutput("score_label"), class = "col-label"),
                 f7Col(style = flex3[2], uiOutput("away_team_score")),
                 f7Col(style = flex3[3], uiOutput("home_team_score"))
