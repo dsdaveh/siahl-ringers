@@ -307,6 +307,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$ringers_label <- renderUI({
+        req(game_data())
         "Ringers"
     })
     
