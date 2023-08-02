@@ -96,11 +96,13 @@ f7Page(
             ),
             f7Row(
                 f7Col(
-                    tags$p("For more context about this app, see"),
-                    tags$a("An open letter to Sharks Ice Adult Hockey League Management",
-                           href = "http://rpubs.com/dsdaveh/ringerwip")
+                    tags$p("For more context about this app, see",
+                           tags$a("An open letter to Sharks Ice Adult Hockey League Management",
+                                  href = "http://rpubs.com/dsdaveh/ringerwip", 
+                                  target = "_blank",
+                                  rel = "noopener noreferrer"))
                 )
-            )
+            ),
         )
     )
 )
