@@ -49,7 +49,7 @@ n_ringers <- nrow(ringers)
 ```
 
 |                                                                                  |                     |
-|----------------------------------------------------------------------------------|---------------------|
+|------------------------------------------------------|------------------|
 | Total number of games played across all divisions                                | `r n_games`         |
 | Number of Divisions                                                              | `r n_divisions`     |
 | Number of Teams                                                                  | `r n_teams`         |
@@ -149,18 +149,24 @@ This problem can be easily addressed using an app that scans past and current ga
 :::
 
 ::: g-col-8
-[*NOTE*: This is app is currently pre-alpha, and should only be used to get an idea for what is possible.]{style="color:red;"}
+[*NOTE*: This is app is a preliminary proof-of-concept, and should only be used to get an idea for what is possible.]{style="color:red;"}
 
-It is best viewed on an iPhone, but a simulation with example game links is available at <https://dsdaveh.github.io/siahl-ringers/>. To view the app directly from a mobile device click [here](https://dsdaveh.shinyapps.io/siahl_ringers/):
+It is best viewed on an iPhone, but a simulation with example game links is available at <https://dsdaveh.github.io/siahl-ringers/>. To view the app directly from a mobile device click [here](https://dsdaveh.shinyapps.io/siahl_ringers/){target="_blank"}
 
-To use it:
+To use it, you can enter a Game ID via one of three methods:
 
--   Enter a game number
-    -   For now - Games from the current season only (eg. 387361)
-    -   Game numbers can be seen from the SIAHL team pages
-    -   (**future plans** to expand the UI to make games easier to find)
+1.  Enter the GameID directly.\
+    These are visible from team pages (eg [Choking Hazards-Spring 2023](https://stats.sharksice.timetoscore.com/display-schedule?team=3329&season=59&league=1&stat_class=1))
+
+2.  Use the example game dropdown to view one of the games with ringer effects detected.
+
+3.  Use the team dropdown to select a team.\
+
+    a.  The dropdown options will repopulate with games specific to that team.\
+    b.  Select a game from the new dropdown options
+
 -   `Score` is the actual games score
--   `Adjusted` is the score if all goals involving ringers were removed
+-   `Adj* Score` is the score if all goals involving ringers were removed
 -   `Ringers` are a list of players who also play on teams in higher skilled (lower numbered) divisions more than 2 from division the current game is being played in
 -   Yellow lines in the score line indicate goals that would be removed for the "adjustment"
 :::
