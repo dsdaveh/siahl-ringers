@@ -167,7 +167,10 @@ get_ringers <- function(box_score, home = TRUE, player_stats = all_teams) {
     playing <- scorecard_players(box_score, home = home) %>% 
         filter(P != 'G') %>%  # remove goalie
         mutate(match_name = map_chr(Name, match_player_name, team_roster)) %>% 
-        left_join(player_stats %>% select(match_name = Name, Div = ringer_level), by = 'match_name') %>% 
+        left_join(player_stats %>% 
+                      select(match_name = Name, Div = ringer_level) %>% 
+                      unique(),
+                  by = 'match_name') %>% 
         unique() 
 
     
