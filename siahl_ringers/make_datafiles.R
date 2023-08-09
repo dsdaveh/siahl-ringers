@@ -23,6 +23,6 @@ affected_games <- games_adj %>%
     filter(adj_effect) %>% 
     mutate(n_ringer_goals = h_goals + v_goals - hg_adj - hg_adj) %>% 
     arrange(-n_ringer_goals)
-write_csv(affected_games, file = hear(shiny_dir, "affected_games.csv")
+write_csv(affected_games, file = here(shiny_dir, "affected_games.csv"))
 
 
