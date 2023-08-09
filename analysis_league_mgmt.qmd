@@ -50,7 +50,7 @@ n_ringers <- nrow(ringers)
 ```
 
 |                                                                                  |                     |
-|-----------------------------------------------------|-------------------|
+|----------------------------------------------------------------------------------|---------------------|
 | Total number of games played across all divisions                                | `r n_games`         |
 | Number of Divisions                                                              | `r n_divisions`     |
 | Number of Teams                                                                  | `r n_teams`         |
