@@ -231,7 +231,8 @@ scorecard_goals <- function(box_score, home = TRUE, remove_ringer_goals = FALSE,
         filter(! goal %in% ringers,
                ! ass %in% ringers,
                ! ass_2 %in% ringers) %>% 
-        mutate(time = ifelse(str_detect(time, ':'), time, "00:01")) # round to last second
+        mutate(time = ifelse(str_detect(time, ':'), time, "00:01"), # round to last second
+               mutate(across(everything(), as.character))) #prevent empty tables returning <lgl>
 }
 
 #scoresheet division entry is not always consistent with web site (eg. 7B vs 7B West)
