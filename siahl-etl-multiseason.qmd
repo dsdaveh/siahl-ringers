@@ -1,8 +1,10 @@
 ---
-title: "SIAHL Stats RTL - using player lookup"
+title: "SIAHL Stats ETL - using player lookup"
 format: html
 editor: visual
 ---
+
+This is a work in progress to gather player data across multiple seasons
 
 ```{r}
 #| message: false

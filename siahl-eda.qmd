@@ -22,11 +22,11 @@ season_name <- "Current"
 players_file <- sprintf("player_stats-%s.RDS", season_name)
 games_stats_file <- sprintf("games_stats-%s.RDS", season_name)
 scorecards_file <- sprintf("games_tables-%s.RDS", season_name)
-players <- readRDS(file = players_file) %>% 
+players <- readRDS(file = here('data', players_file)) %>% 
     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
-games <- readRDS(file = games_stats_file) %>% 
+games <- readRDS(file = here('data', games_stats_file)) %>% 
     mutate(across(where(~ all(!is.na(as.numeric(.)))), as.numeric, .names = "{.col}"))
-scorecards <- readRDS(file = scorecards_file)
+scorecards <- readRDS(file = here('data', scorecards_file))
 ```
 
 ```{r}
@@ -434,5 +434,5 @@ summary(lm_fit)
 
 ```{r}
 rdata_file <- sprintf('siahl-eda-%s.qmd.RData', season_name)
-save.image(file = rdata_file)
+save.image(file = here('data', rdata_file))
 ```
