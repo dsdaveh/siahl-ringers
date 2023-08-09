@@ -7,7 +7,7 @@
 library(here)
 source(here('siahl-utils.R'))
 
-load(here("siahl-eda-Current.qmd.RData"))
+load(here('data', "siahl-eda-Current.qmd.RData"))
 saveRDS(all_teams, file = here("siahl_ringers/all_teams-Current.RDS" ))
 
 affected_game_ids <- games_adj %>% filter(adj_effect) %>% pull(Game)
