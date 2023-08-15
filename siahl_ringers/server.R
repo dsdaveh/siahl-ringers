@@ -27,11 +27,13 @@ teams <- all_teams %>%
 all_games <- readRDS(file = "games_stats-Current.RDS") %>% 
     mutate(home_away = ifelse(Home == Team, "Home", "Away"),
            opponent = ifelse(Home == Team, Away, Home),
-           desc = sprintf("Game %s - %s (%s) vs %s %d-%d (Div %s)",
+           desc = sprintf("Game %s %2d/%2d- %s (%s) vs %s %d-%d (Div %s)",
                           Game,
+                          month(Date), day(Date),
                           Team, home_away, opponent,
                           `Home Goals`, `Away Goals`,
-                          Division))
+                          Division)) %>% 
+    arrange(desc(Date))
 
 
 shinyServer(function(input, output, session) {

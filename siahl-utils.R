@@ -121,7 +121,7 @@ construct_scoring_table <- function(box_score) {
         h_scores %>% left_join(fair_goals, join_by(Period, Time))) %>% 
         mutate(timesort = ymd_hm(paste('2021-01-01', Time)),
                adj = ifelse(is.na(adj), "*", adj)) %>% 
-        arrange(Period, timesort) %>% 
+        arrange(Period, desc(timesort)) %>% 
         select(-timesort)
     
     return(all_scores)
@@ -393,8 +393,11 @@ get_season_teams <- function(sid, verbose = 1) {
                season_name = season_name)
 }
 
-wlt_outcome <- function(score, comparison) {
-    if (score > comparison) return("Win")
-    if (score < comparison) return("Loss")
-    return("Tie")
+wlt_outcome <- function(score, comparison, text = TRUE) {
+    outcome_points <- c("Win" = 2, "Loss" = 0, "Tie" = 1)
+    outcome <- "Tie"
+    if (score > comparison) outcome <- "Win"
+    if (score < comparison) outcome <- "Loss"
+    if (text) { return(outcome) }
+    else { return(outcome_points[outcome])}
 }
