@@ -38,7 +38,7 @@ seasons <- tibble(
 )
 ```
 
-Get the team division information for `Winter 2023`
+Get the team division information for *the specified season (Current?)*
 
 TODO: this should be input to this file
 
@@ -102,6 +102,12 @@ Scrape Game and Player info (loop over teams)
 players <- tibble() 
 all_games <- tibble()
 
+#TODO - harden this to work across New Years -  used for app pull down ordering
+game_year <- ifelse(is.na(season_yr <- str_extract(season, '20\\d\\d')),  
+                    year(now()), #Current
+                    as.numeric(season_yr) )
+                    
+
 # game_tables is more intensive, so we leverage existing data
 game_tables_file = here('data', sprintf("games_tables-%s.RDS", season))
 if (file.exists(game_tables_file)) {
@@ -132,7 +138,7 @@ for (iteam in 1:nrow(teams)) {
     
     team_tables <- team_webpage %>% html_nodes("table")
     player_stats <- team_tables %>% .[2] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header()
-    game_list <-    team_tables %>% .[1] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header()
+    game_list <-    team_tables %>% .[1] %>% html_table(header = TRUE) %>% .[[1]] %>% promote_header() 
     
     #fix duplicate Goals headers
     game_cols <- names(game_list) 
@@ -140,9 +146,12 @@ for (iteam in 1:nrow(teams)) {
     game_cols[fix_cols[1]] <- 'Away Goals'
     game_cols[fix_cols[2]] <- 'Home Goals'
     names(game_list) <- game_cols
-    
     game_list <- game_list %>% 
-        filter(str_detect(Game, "\\*$")) ## remove future and in progress games
+        mutate(Date = mdy(paste(Date, game_year))) %>% 
+        filter(str_detect(Type, 'Regular')) # exclude "Preseason" and "Exhibition"
+    
+    # game_list <- game_list %>% 
+    #     filter(str_detect(Game, "\\*$")) ## remove future and in progress games
     
     player_stats <- player_stats %>% 
         mutate(across(3:ncol(.), as.numeric)) %>% 
@@ -156,7 +165,7 @@ for (iteam in 1:nrow(teams)) {
                Division = teams$division[iteam]
     ) %>% bind_cols(
         game_list %>% 
-        select(Game, Home, Away, `Home Goals`, `Away Goals`) %>% 
+        select(Game, Date, Home, Away, `Home Goals`, `Away Goals`) %>% 
         mutate(home = Home == team_name,
                shootout = str_detect(paste0(`Home Goals`, `Away Goals`), 'S'),
                `Home Goals` = as.numeric(str_extract(`Home Goals`, '\\d+')),
@@ -176,10 +185,10 @@ for (iteam in 1:nrow(teams)) {
 Save files to disk
 
 ```{r}
-player_file = sprintf("player_stats-%s.RDS", season)
-games_file = sprintf("games_stats-%s.RDS", season)
-saveRDS(players, file = here('data', player_file))
-saveRDS(all_games, file = here('data', games_file))
+player_file = here('data', sprintf("player_stats-%s.RDS", season))
+games_file = here('data', sprintf("games_stats-%s.RDS", season))
+saveRDS(players, file = player_file)
+saveRDS(all_games, file = games_file)
 saveRDS(seasons, file = here('data', season_file))
-saveRDS(game_tables, file = here('data', game_tables_file))
+saveRDS(game_tables, file = game_tables_file)
 ```

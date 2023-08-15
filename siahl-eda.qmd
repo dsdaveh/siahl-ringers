@@ -124,23 +124,29 @@ progress_count <- 0
 for (game_id in home_games_unprocessed) {
     if((progress_count <- progress_count + 1) %% 100 == 0) message("...", progress_count)
     scorecard <- scorecards[[game_id]]
-    scorecard <- fix_known_scorecard_errors(scorecard, game_id)
     game_row <- games %>% 
-        filter(Game == game_id, home == 1 ) %>% 
-        mutate(h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
-               v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
-               hg_adj = scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
-               vg_adj = scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow(),
-               hdiff_adj = hg_adj - vg_adj,
-               hpts = home_points(h_goals, v_goals),
-               hpts_adj = home_points(hg_adj, vg_adj),
-               adj_effect = hpts != hpts_adj)
+        filter(Game == game_id, home == 1 )
+    if(! is.null(scorecard)) {
+        scorecard <- fix_known_scorecard_errors(scorecard, game_id)
+        game_row <- game_row %>% 
+            filter(Game == game_id, home == 1 ) %>% 
+            mutate(h_goals = scorecard %>% scorecard_goals(home = TRUE) %>% nrow(),
+                   v_goals = scorecard %>% scorecard_goals(home = FALSE) %>% nrow(),
+                   hg_adj = scorecard %>% scorecard_goals(home = TRUE, remove_ringer_goals = TRUE) %>% nrow(),
+                   vg_adj = scorecard %>% scorecard_goals(home = FALSE, remove_ringer_goals = TRUE) %>% nrow(),
+                   hdiff_adj = hg_adj - vg_adj,
+                   hpts = home_points(h_goals, v_goals),
+                   hpts_adj = home_points(hg_adj, vg_adj),
+                   adj_effect = hpts != hpts_adj)
+    }
     games_adj <- bind_rows(games_adj, game_row) 
 }
+message("... ", progress_count, " games processed")
 ```
 
 ```{r}
 effect_by_div <- games_adj %>% 
+    filter(! is.na(adj_effect)) %>% 
     mutate(Level = str_extract(Division, '\\d+')) %>% 
     group_by(Level) %>% 
     summarize(affected = sum(adj_effect) / n(), .groups = 'drop') 
@@ -165,15 +171,41 @@ effect_by_div %>%
 Which team had the biggest affect from Ringers
 
 ```{r}
-ringer_affect <- games_adj %>% 
-    group_by(Team, Division) %>% 
-    summarise(affect_games = sum(adj_effect),
-              affect_pct = affect_games / n(),
-              .groups = 'drop') %>% 
-    filter(affect_games > 0) %>% 
-    arrange(-affect_pct)
+ringer_effect <- tibble()
+affected_game_ids <- games_adj %>% filter(adj_effect) %>% pull(Game)
+affected_scorecards <- scorecards
+for(gid in affected_game_ids) {
+    if (! gid %in% affected_game_ids) affected_scorecards[[gid]] <- NULL
+    game_row <- games_adj %>% filter(Game == gid) 
+    game_scores <- tibble::tribble(
+        ~Game, ~Division, ~team, ~goals, ~goals_adj, ~season_pts, ~season_pts_adj,
+        #Home team row
+        gid, game_row$Division,
+        game_row$Home, 
+        game_row$h_goals, 
+        game_row$hg_adj, 
+        wlt_outcome(game_row$h_goals, game_row$v_goals, text = FALSE),
+        wlt_outcome(game_row$hg_adj, game_row$vg_adj, text = FALSE),
+        #Away team row
+        gid, game_row$Division,
+        game_row$Away, 
+        game_row$v_goals, 
+        game_row$vg_adj,
+        wlt_outcome(game_row$v_goals, game_row$h_goals, text = FALSE),
+        wlt_outcome(game_row$vg_adj, game_row$hg_adj, text = FALSE)
+    ) %>% 
+        mutate(season_pts_diff = season_pts_adj - season_pts) 
+    
+    ringer_effect <- bind_rows(ringer_effect, game_scores)
+}
 
-worst_offender <- ringer_affect %>% slice(1) %>% pull(Team, Division)
+ringer_effect_agg <- ringer_effect %>% 
+    group_by(team, Division) %>% 
+    summarise(adj_points = sum(season_pts_diff),
+              .groups = 'drop') %>% 
+    arrange(adj_points)
+
+worst_offender <- ringer_effect_agg %>% slice(1) %>% pull(team, Division)
 worst_offender
 ```
 
