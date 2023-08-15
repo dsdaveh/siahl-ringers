@@ -115,11 +115,13 @@ construct_scoring_table <- function(box_score) {
         select(Period = per, Time = time) %>% 
         mutate(adj = " ")
     
-    
+    # return empty if not scoring yet
+    if (nrow(v_scores) == 0 && nrow(h_scores) == 0) return(h_scores)
+
     all_scores <- bind_rows(
         v_scores %>% left_join(fair_goals, join_by(Period, Time)),
         h_scores %>% left_join(fair_goals, join_by(Period, Time))) %>% 
-        mutate(timesort = ymd_hm(paste('2021-01-01', Time)),
+        mutate(timesort = ymd_hm(paste('2021-01-01', Time)),    #date doesn't matter
                adj = ifelse(is.na(adj), "*", adj)) %>% 
         arrange(Period, desc(timesort)) %>% 
         select(-timesort)

@@ -184,39 +184,39 @@ shinyServer(function(input, output, session) {
     # })
     
     output$away_team_score <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         score_number <- game_data()$v_goals
         score_color <- wlt_color(score_number, game_data()$h_goals)
         score_display(score_number, score_color)
     })
     
     output$home_team_score <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         score_number <- game_data()$h_goals
         score_color <- wlt_color(score_number, game_data()$v_goals)
         score_display(score_number, score_color)
     })    
     output$away_team_adj_info <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         score_number <- game_data()$vg_adj
         score_color <- wlt_color(score_number, game_data()$hg_adj)
         score_display(score_number, score_color)
     })
     
     output$home_team_adj_info <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         score_number <- game_data()$hg_adj
         score_color <- wlt_color(score_number, game_data()$vg_adj)
         score_display(score_number, score_color)
     })
     
     output$score_label <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         "Score"
     })
     
     output$adjusted_label <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         "Adj* Score"
      })
     
@@ -265,7 +265,7 @@ shinyServer(function(input, output, session) {
     
     # Display the game status
     output$affect <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         if(game_data()$game_status == "Completed") {
             hgoals <- game_data()$h_goals
             vgoals <- game_data()$v_goals
@@ -309,30 +309,30 @@ shinyServer(function(input, output, session) {
     })
     
     output$ringers_label <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         "Ringers"
     })
     
     gt_small_font <- function(x, ...) {gt(x, ...) %>% tab_options(table.font.size = "small")}
     output$away_team_ringers <- gt::render_gt({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         game_data()$v_ringers %>% 
             gt_small_font()
     })
     
     output$home_team_ringers <- gt::render_gt({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         game_data()$h_ringers  %>% 
             gt_small_font()
     })
     
     output$scoring_label <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         tags$p("Scoring", style = "text-align:right")
     })
     
     output$scoring <- gt::render_gt({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         game_data()$scoring %>% 
             gt_small_font() %>%
             sub_missing(
@@ -347,7 +347,7 @@ shinyServer(function(input, output, session) {
     })
     
     output$explanation <- renderUI({
-        req(game_data())
+        req(game_data(), game_data()$game_status == "Completed")
         p("*Adjusted Score is the result of removing goals
           highlighted in yellow that involved players from the Ringers
           list, based on their play in more advanced divisions (see Div column).")
