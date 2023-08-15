@@ -116,7 +116,7 @@ construct_scoring_table <- function(box_score) {
         mutate(adj = " ")
     
     # return empty if not scoring yet
-    if (nrow(v_scores) == 0 && nrow(h_scores) == 0) return(h_scores)
+    if (nrow(v_scores) == 0 && nrow(h_scores) == 0) return(h_scores %>% mutate(adj = NA))
 
     all_scores <- bind_rows(
         v_scores %>% left_join(fair_goals, join_by(Period, Time)),
