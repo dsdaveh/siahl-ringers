@@ -43,8 +43,11 @@ Get the team division information for *the specified season (Current?)*
 TODO: this should be input to this file
 
 ```{r}
-season <- 'Current' # "Current" or "<Season> <Year>" eg. "Winter 2023"
-season_id <- seasons %>% filter(season_name == season) %>% pull(season_id)
+#TODO: consolidate these into a single input
+season_name <- 'Current' # "Current" or "<Season> <Year>" eg. "Winter 2023"
+season <- 'Current' # "Current" or "<Year>_<Season>" eg. "2023_winter"
+
+season_id <- seasons %>% filter(season_name == .env$season_name) %>% pull(season_id)
 stopifnot(season_id >= 0)
 season_file <- "siahl_season_ids.RDS"
 
