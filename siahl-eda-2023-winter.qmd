@@ -106,12 +106,6 @@ get_xleague_stats <- function(players_df) {
 ringers <- players_multi %>% 
     get_xleague_stats() %>% 
     filter(Div_spread > 2)
-
-all_teams <- players %>%
-    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>%
-    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>%
-    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
-           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count))
 ```
 
 The `all_seasons` dataset represents a more efficient and comprehensive way to do this (discovered after writing the method above). In August 2023, I discovered that the rosters for past seasons are not stable as some names were removed, whereby the all_seasons dataset is more stable because it records all the games the players played in (not just the ones they played as rostered player). The downside to this dataset is that it takes a very long time to scrape (scrape must be executed for each player), so it's probably best to rely on the former method for the current season.
@@ -135,8 +129,17 @@ if (nrow(players2) > 0) {
         filter(Div_spread > 2)
 }
     
-if (exists("ringers2")) ringers <- ringers
+ringers0 <- ringers
+if (exists("ringers2")) ringers <- ringers2
 
+```
+
+```{r}
+all_teams <- players %>%
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>%
+    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>%
+    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
+           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count))
 ```
 
 Which teams have the most ringers
@@ -225,9 +228,7 @@ Which teams had the biggest affect from Ringers
 ```{r}
 ringer_effect <- tibble()
 affected_game_ids <- games_adj %>% filter(adj_effect) %>% pull(Game)
-affected_scorecards <- scorecards
 for(gid in affected_game_ids) {
-    if (! gid %in% affected_game_ids) affected_scorecards[[gid]] <- NULL
     game_row <- games_adj %>% filter(Game == gid) 
     game_scores <- tibble::tribble(
         ~Game, ~Division, ~team, ~goals, ~goals_adj, ~season_pts, ~season_pts_adj,
@@ -258,14 +259,6 @@ ringer_effect_agg <- ringer_effect %>%
     arrange(adj_points)
 
 worst_offender <- ringer_effect_agg %>% slice(1) %>% pull(team, Division)
-worst_offender
-```
-
-Winter 2023 only: Let's skip the Mermen, since they appear to have gone nuts, but it's a small league and there were no ringer affects in the summer. The next two teams are from 6A, so it illustrates the main point better.\
-\
-
-```{r}
-worst_offender <- ringer_effect_agg %>% slice(2) %>% pull(team, Division)
 worst_offender
 ```
 

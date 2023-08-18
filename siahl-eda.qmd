@@ -106,12 +106,6 @@ get_xleague_stats <- function(players_df) {
 ringers <- players_multi %>% 
     get_xleague_stats() %>% 
     filter(Div_spread > 2)
-
-all_teams <- players %>%
-    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>%
-    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>%
-    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
-           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count))
 ```
 
 The `all_seasons` dataset represents a more efficient and comprehensive way to do this (discovered after writing the method above). In August 2023, I discovered that the rosters for past seasons are not stable as some names were removed, whereby the all_seasons dataset is more stable because it records all the games the players played in (not just the ones they played as rostered player). The downside to this dataset is that it takes a very long time to scrape (scrape must be executed for each player), so it's probably best to rely on the former method for the current season.
@@ -137,6 +131,14 @@ if (nrow(players2) > 0) {
     
 if (exists("ringers2")) ringers <- ringers
 
+```
+
+```{r}
+all_teams <- players %>%
+    mutate(DivLevel = str_extract(Division, '\\d+') %>% as.numeric()) %>%
+    left_join(ringers %>% select(Name, ringer_level = best_level) , by = 'Name') %>%
+    mutate(ringer_count = ifelse((DivLevel - ringer_level) > 2, 1, 0),
+           ringer_count = ifelse(is.na(ringer_count), 0, ringer_count))
 ```
 
 Which teams have the most ringers
@@ -225,9 +227,7 @@ Which teams had the biggest affect from Ringers
 ```{r}
 ringer_effect <- tibble()
 affected_game_ids <- games_adj %>% filter(adj_effect) %>% pull(Game)
-affected_scorecards <- scorecards
 for(gid in affected_game_ids) {
-    if (! gid %in% affected_game_ids) affected_scorecards[[gid]] <- NULL
     game_row <- games_adj %>% filter(Game == gid) 
     game_scores <- tibble::tribble(
         ~Game, ~Division, ~team, ~goals, ~goals_adj, ~season_pts, ~season_pts_adj,
@@ -318,6 +318,7 @@ geom_arrow <- function(...) {
                                     angle = 20, length = unit(0.1, "inches")))
 }
 
+axis_range <- range(c(worst_case_season$goal_diff, worst_case_season$adj_gdiff), na.rm = T)
 game_note <- 17
 annotate_diff <- worst_case_season %>% arrange(`Game/ID`) %>% .[game_note, ]
 note_orig <- sprintf(" Original Goal Differential (%d-%d)", annotate_diff$goals_for, annotate_diff$goals_against)
@@ -335,7 +336,9 @@ goal_diff_plt <- worst_case_season %>%
                data = . %>% filter(goal_diff != adj_gdiff)) +
     ggtitle("Change in goal differential when ringer influenced goals are removed",
             subtitle = "(Arrows touching/passing through 0 indicate a change in Standings points)") +
-    xlab("")
+    xlab("") +
+    ylab(sprintf("%s /Game ID", worst_offender)) +
+    scale_x_continuous(breaks = seq(axis_range[1], axis_range[2] ,by = 1), minor_breaks = NULL)
 goal_diff_plt
 ```
 
