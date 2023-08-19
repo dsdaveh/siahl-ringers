@@ -331,7 +331,7 @@ goal_diff_plt <- worst_case_season %>%
     geom_vline(xintercept = 0) + 
     theme_minimal() +
     annotate("text", y = game_note + 1.0, x = annotate_diff$goal_diff, 
-             label = note_orig, hjust = "right", color = 'darkred') +
+             label = note_orig, hjust = "center", color = 'darkred') +
     annotate("text", y = game_note + 0.5, x = annotate_diff$adj_gdiff, 
              label = note_adj, hjust = "center", color = 'darkred') +
     geom_arrow(aes(xend = adj_gdiff), color = "blue", 
