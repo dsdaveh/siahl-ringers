@@ -12,6 +12,7 @@ execute:
 library(tidyverse)
 library(gt)
 library(here)
+library(scales)
 source('siahl-utils.R')
 load(here('data', 'siahl-eda-2023_winter.qmd.RData'))
 ```
@@ -52,7 +53,7 @@ n_ringers <- nrow(ringers)
 ```
 
 |                                                                                  |                     |
-|-------------------------------------------------------|-----------------|
+|------------------------------------------------------|------------------|
 | Total number of games played across all divisions                                | `r n_games`         |
 | Number of Divisions                                                              | `r n_divisions`     |
 | Number of Teams                                                                  | `r n_teams`         |
@@ -135,8 +136,11 @@ goal_diff_plt
 More comprehensively, we can see how all the teams standings in this division would have changed, if the adjusted score had been the actual score. This has a material impact on teams that miss the playoffs because they were pushed lower in the standings by teams that inflated their league standings through the use of ringers.
 
 ```{r}
+ringer_goals_pct <- worst_case_players %>% filter(is_ringer) %>% pull(Goals_pct) %>% percent()
 worst_rank_change_plt
 ```
+
+In this case `Seal Team Sticks` season standings would have plummeted if they had not had the scoring help from their ringers who provided `r ringer_goals_pct` of the team's scoring. More generally, the plot shows how teams may be getting unfairly bumped out of the playoffs, due to the inflated rankings of teams that rely on ringers for their scoring.
 
 To be sure, we can't assume the adjusted scores would reasonably forecast alternative outcomes using this method, but instead propose the adjustment as a proxy for measuring one aspect of how ringers affect games. There are certainly other effects at play that would be harder to measure. For example a defenseman playing in a league they are overqualified for is likely to shut down scoring for more novice players, but their individual impact wouldn't be directly observable on the score sheet.
 
