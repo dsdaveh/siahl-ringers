@@ -3,6 +3,8 @@
 .RData
 .Ruserdata
 
+bak/*
+
 # symbolic linked files
-siahl_ringers/games_tables-Current.RDS
-siahl_ringers/siahl-utils.R
+code/siahl_ringers/games_tables-Current.RDS
+code/siahl_ringers/siahl-utils.R
