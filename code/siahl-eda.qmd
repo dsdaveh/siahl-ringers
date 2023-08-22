@@ -318,13 +318,21 @@ geom_arrow <- function(...) {
                                     angle = 20, length = unit(0.1, "inches")))
 }
 
-#illustrative_game_id <- "387361*"
 axis_range <- range(c(worst_case_season$goal_diff, worst_case_season$adj_gdiff), na.rm = T)
-game_note <- which(worst_case_season$Game == illustrative_game_id)
 
-annotate_diff <- worst_case_season %>% arrange(`Game/ID`) %>% .[game_note, ]
-note_orig <- sprintf(" Original Goal\nDifferential (%d-%d)", annotate_diff$goals_for, annotate_diff$goals_against)
-note_adj <- sprintf("Adjusted (%d-%d) ", annotate_diff$adj_goals_for, annotate_diff$adj_goals_against)
+# set illustrative_game_id for an improved explantory annotation specific to the plot
+#illustrative_game_id <- "387361*". 
+if (exists("illustrative_game_id")) {
+    game_note <- which(worst_case_season$Game == illustrative_game_id)
+    note_orig <- sprintf(" Original Goal\nDifferential (%d-%d)", annotate_diff$goals_for, annotate_diff$goals_against)
+    
+    note_adj <- sprintf("Adjusted (%d-%d) ", annotate_diff$adj_goals_for, annotate_diff$adj_goals_against)
+} else {
+    game_note <- 1
+    note_orig <- note_adj <- ""
+}
+    annotate_diff <- worst_case_season %>% arrange(`Game/ID`) %>% .[game_note, ]
+
 goal_diff_plt <- worst_case_season %>% 
     ggplot(aes(y = `Game/ID`, yend = `Game/ID`, x = goal_diff)) +
     geom_point() +
