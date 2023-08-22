@@ -1,0 +1,11 @@
+name: Publish Document
+title:
+username:
+account: rpubs
+server: rpubs.com
+envVars: rpubs.com
+hostUrl: https://api.rpubs.com/api/v1/document/1061410/1ad10b2bcfcd4664be74ed2a57791761
+appId: https://api.rpubs.com/api/v1/document/1061410/1ad10b2bcfcd4664be74ed2a57791761
+bundleId: http://rpubs.com/dsdaveh/1061410
+url: 1692743984.11821
+version: 1

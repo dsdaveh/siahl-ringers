@@ -7,7 +7,7 @@
 library(here)
 source(here('siahl-utils.R'))
 
-shiny_dir <- 'siahl_ringers'
+shiny_dir <- 'code/siahl_ringers'
 
 load(here('data', "siahl-eda-Current.qmd.RData"))
 saveRDS(all_teams, file = here(shiny_dir, "all_teams-Current.RDS" ))
