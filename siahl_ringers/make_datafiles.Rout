@@ -1,0 +1,76 @@
+
+R version 4.3.0 (2023-04-21) -- "Already Tomorrow"
+Copyright (C) 2023 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin20 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ## run all chunks in siahl-etl.qmd
+> ## run all chunks in siahl-eda.qmd
+> 
+> 
+> ## App deployment -- ignore warnings
+> 
+> library(here)
+here() starts at /Users/davehurst/Documents/GitHub/siahl-ringers
+> source(here('siahl-utils.R'))
+── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+✔ dplyr     1.1.2     ✔ readr     2.1.4
+✔ forcats   1.0.0     ✔ stringr   1.5.0
+✔ ggplot2   3.4.2     ✔ tibble    3.2.1
+✔ lubridate 1.9.2     ✔ tidyr     1.3.0
+✔ purrr     1.0.1     
+── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+✖ dplyr::filter() masks stats::filter()
+✖ dplyr::lag()    masks stats::lag()
+ℹ Use the conflicted package (<http://conflicted.r-lib.org/>) to force all conflicts to become errors
+
+Attaching package: ‘janitor’
+
+The following objects are masked from ‘package:stats’:
+
+    chisq.test, fisher.test
+
+
+Attaching package: ‘rvest’
+
+The following object is masked from ‘package:readr’:
+
+    guess_encoding
+
+> 
+> shiny_dir <- 'siahl_ringers'
+> 
+> load(here('data', "siahl-eda-Current.qmd.RData"))
+> saveRDS(all_teams, file = here(shiny_dir, "all_teams-Current.RDS" ))
+> 
+> affected_game_ids <- games_adj %>% filter(adj_effect) %>% pull(Game)
+> affected_scorecards <- scorecards
+> for(gid in names(affected_scorecards)) {
++     if (! gid %in% affected_game_ids) affected_scorecards[[gid]] <- NULL
++ }
+> saveRDS(affected_scorecards, file = here(shiny_dir, "scorecards.RDS" ))
+> 
+> affected_games <- games_adj %>% 
++     filter(adj_effect) %>% 
++     mutate(n_ringer_goals = h_goals + v_goals - hg_adj - hg_adj) %>% 
++     arrange(-n_ringer_goals)
+> write_csv(affected_games, file = here(shiny_dir, "affected_games.csv"))
+> 
+> 
+> 
+> proc.time()
+   user  system elapsed 
+  1.673   0.145   1.848 

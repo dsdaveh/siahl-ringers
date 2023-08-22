@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.353">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+
+<title>SIAHL Stats EDA</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="siahl-etl_files/libs/clipboard/clipboard.min.js"></script>
+<script src="siahl-etl_files/libs/quarto-html/quarto.js"></script>
+<script src="siahl-etl_files/libs/quarto-html/popper.min.js"></script>
+<script src="siahl-etl_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="siahl-etl_files/libs/quarto-html/anchor.min.js"></script>
+<link href="siahl-etl_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="siahl-etl_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="siahl-etl_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="siahl-etl_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="siahl-etl_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">SIAHL Stats EDA</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(rvest)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(xml2)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(polite)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(here)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Define the URL</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>base_url <span class="ot">&lt;-</span> <span class="st">"https://stats.sharksice.timetoscore.com/"</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a><span class="fu">source</span>(<span class="st">'siahl-utils.R'</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Get the season list</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="fu">paste0</span>(base_url, <span class="st">"display-stats.php?league=1"</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the webpage</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>webpage <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url)</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Get the seasons</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>season_menu <span class="ot">&lt;-</span> webpage <span class="sc">%&gt;%</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_element</span>(<span class="st">"select"</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>    <span class="fu">html_elements</span>(<span class="st">"option"</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>seasons <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">season_id =</span> season_menu <span class="sc">%&gt;%</span> <span class="fu">html_attr</span>(<span class="st">"value"</span>),</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">season_name =</span> season_menu <span class="sc">%&gt;%</span> <span class="fu">html_text2</span>()</span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Get the team division information for <em>the specified season (Current?)</em></p>
+<p>TODO: this should be input to this file</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">#TODO: consolidate these into a single input</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>season_name <span class="ot">&lt;-</span> <span class="st">'Current'</span> <span class="co"># "Current" or "&lt;Season&gt; &lt;Year&gt;" eg. "Winter 2023"</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>season <span class="ot">&lt;-</span> <span class="st">'Current'</span> <span class="co"># "Current" or "&lt;Year&gt;_&lt;Season&gt;" eg. "2023_winter"</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>season_id <span class="ot">&lt;-</span> seasons <span class="sc">%&gt;%</span> <span class="fu">filter</span>(season_name <span class="sc">==</span> .env<span class="sc">$</span>season_name) <span class="sc">%&gt;%</span> <span class="fu">pull</span>(season_id)</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="fu">stopifnot</span>(season_id <span class="sc">&gt;=</span> <span class="dv">0</span>)</span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>season_file <span class="ot">&lt;-</span> <span class="st">"siahl_season_ids.RDS"</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a>season_url <span class="ot">&lt;-</span> </span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>url <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"%sdisplay-stats.php?league=1&amp;season=%s"</span>, base_url, season_id)</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Read the webpage</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>webpage <span class="ot">&lt;-</span> <span class="fu">read_html</span>(url)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="co"># Scrape the Adult Division names and team rows</span></span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>table_rows <span class="ot">&lt;-</span> webpage <span class="sc">%&gt;%</span></span>
+<span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">html_elements</span>(<span class="st">"tr"</span>) </span>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize an empty tibble for storing results</span></span>
+<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a>teams <span class="ot">&lt;-</span> <span class="fu">tibble</span>()</span>
+<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize a variable to store the current division</span></span>
+<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>current_division <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb3-25"><a href="#cb3-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-26"><a href="#cb3-26" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop over each table row</span></span>
+<span id="cb3-27"><a href="#cb3-27" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">length</span>(table_rows)) {</span>
+<span id="cb3-28"><a href="#cb3-28" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Get the row</span></span>
+<span id="cb3-29"><a href="#cb3-29" aria-hidden="true" tabindex="-1"></a>  row <span class="ot">&lt;-</span> table_rows[[i]]</span>
+<span id="cb3-30"><a href="#cb3-30" aria-hidden="true" tabindex="-1"></a>  team_extract <span class="ot">&lt;-</span> row <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">"td a"</span>) <span class="sc">%&gt;%</span>  <span class="fu">html_text</span>(<span class="at">trim =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-31"><a href="#cb3-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-32"><a href="#cb3-32" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Check if it's a division row</span></span>
+<span id="cb3-33"><a href="#cb3-33" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (row <span class="sc">%&gt;%</span> <span class="fu">html_text</span>() <span class="sc">%&gt;%</span> <span class="fu">str_detect</span>(<span class="st">"Adult Division"</span>)) {</span>
+<span id="cb3-34"><a href="#cb3-34" aria-hidden="true" tabindex="-1"></a>    current_division <span class="ot">&lt;-</span> row <span class="sc">%&gt;%</span> <span class="fu">html_text</span>()</span>
+<span id="cb3-35"><a href="#cb3-35" aria-hidden="true" tabindex="-1"></a>    rank <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb3-36"><a href="#cb3-36" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Check if it's a team row</span></span>
+<span id="cb3-37"><a href="#cb3-37" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">length</span>(team_extract) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb3-38"><a href="#cb3-38" aria-hidden="true" tabindex="-1"></a>    team_name <span class="ot">&lt;-</span> row <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">"td a"</span>) <span class="sc">%&gt;%</span>  <span class="fu">html_text</span>(<span class="at">trim =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb3-39"><a href="#cb3-39" aria-hidden="true" tabindex="-1"></a>    team_stats <span class="ot">&lt;-</span> <span class="fu">paste0</span>(base_url, row <span class="sc">%&gt;%</span> <span class="fu">html_elements</span>(<span class="st">"td a"</span>) <span class="sc">%&gt;%</span>  <span class="fu">html_attr</span>(<span class="st">"href"</span>))</span>
+<span id="cb3-40"><a href="#cb3-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-41"><a href="#cb3-41" aria-hidden="true" tabindex="-1"></a>    team_data <span class="ot">&lt;-</span> <span class="fu">tibble</span>(</span>
+<span id="cb3-42"><a href="#cb3-42" aria-hidden="true" tabindex="-1"></a>      <span class="at">team =</span> team_name,</span>
+<span id="cb3-43"><a href="#cb3-43" aria-hidden="true" tabindex="-1"></a>      <span class="at">team_id =</span> team_stats <span class="sc">%&gt;%</span>  <span class="fu">str_extract</span>(<span class="st">'</span><span class="sc">\\</span><span class="st">?team=</span><span class="sc">\\</span><span class="st">d+'</span>) <span class="sc">%&gt;%</span> <span class="fu">str_extract</span>(<span class="st">'</span><span class="sc">\\</span><span class="st">d+'</span>),</span>
+<span id="cb3-44"><a href="#cb3-44" aria-hidden="true" tabindex="-1"></a>      <span class="at">team_stats =</span> team_stats,</span>
+<span id="cb3-45"><a href="#cb3-45" aria-hidden="true" tabindex="-1"></a>      <span class="at">division =</span> current_division <span class="sc">%&gt;%</span> <span class="fu">str_replace</span>(<span class="st">'Adult Division '</span>, <span class="st">''</span>),</span>
+<span id="cb3-46"><a href="#cb3-46" aria-hidden="true" tabindex="-1"></a>      <span class="at">division_rank =</span> rank</span>
+<span id="cb3-47"><a href="#cb3-47" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb3-48"><a href="#cb3-48" aria-hidden="true" tabindex="-1"></a>    rank <span class="ot">=</span> rank <span class="sc">+</span> <span class="dv">1</span></span>
+<span id="cb3-49"><a href="#cb3-49" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-50"><a href="#cb3-50" aria-hidden="true" tabindex="-1"></a>    <span class="co"># Append the team data to final_data</span></span>
+<span id="cb3-51"><a href="#cb3-51" aria-hidden="true" tabindex="-1"></a>    teams <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(teams, team_data)</span>
+<span id="cb3-52"><a href="#cb3-52" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb3-53"><a href="#cb3-53" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Scrape Game and Player info (loop over teams)</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Initialize an empty tibble for storing results</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>players <span class="ot">&lt;-</span> <span class="fu">tibble</span>() </span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>all_games <span class="ot">&lt;-</span> <span class="fu">tibble</span>()</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">#TODO - harden this to work across New Years -  used for app pull down ordering</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>game_year <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(<span class="fu">is.na</span>(season_yr <span class="ot">&lt;-</span> <span class="fu">str_extract</span>(season, <span class="st">'20</span><span class="sc">\\</span><span class="st">d</span><span class="sc">\\</span><span class="st">d'</span>)),  </span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">year</span>(<span class="fu">now</span>()), <span class="co">#Current</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>                    <span class="fu">as.numeric</span>(season_yr) )</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>                    </span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co"># game_tables is more intensive, so we leverage existing data</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>game_tables_file <span class="ot">=</span> <span class="fu">here</span>(<span class="st">'data'</span>, <span class="fu">sprintf</span>(<span class="st">"games_tables-%s.RDS"</span>, season))</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">file.exists</span>(game_tables_file)) {</span>
+<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>    game_tables <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="at">file =</span> game_tables_file)</span>
+<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>    game_tables <span class="ot">&lt;-</span> <span class="fu">list</span>()</span>
+<span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a><span class="co">#game_tables is a global lookup</span></span>
+<span id="cb4-20"><a href="#cb4-20" aria-hidden="true" tabindex="-1"></a>get_scoring_html <span class="ot">&lt;-</span> <span class="cf">function</span>(game_id, <span class="at">verbose =</span> <span class="cn">TRUE</span>) {</span>
+<span id="cb4-21"><a href="#cb4-21" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="sc">!</span> <span class="fu">str_detect</span>(game_id, <span class="st">'</span><span class="sc">\\</span><span class="st">*$'</span>)) <span class="fu">return</span>() <span class="co"># skip if game isn't complete </span></span>
+<span id="cb4-22"><a href="#cb4-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (<span class="fu">is.null</span>(game_tables[[game_id]])) {</span>
+<span id="cb4-23"><a href="#cb4-23" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> (verbose) <span class="fu">message</span>(<span class="st">'Capturing game '</span>, game_id)</span>
+<span id="cb4-24"><a href="#cb4-24" aria-hidden="true" tabindex="-1"></a>        game_url <span class="ot">=</span> <span class="fu">sprintf</span>(<span class="st">"%soss-scoresheet?game_id=%s&amp;mode=display"</span>, </span>
+<span id="cb4-25"><a href="#cb4-25" aria-hidden="true" tabindex="-1"></a>                                 base_url ,<span class="fu">str_extract</span>(game_id, <span class="st">'</span><span class="sc">\\</span><span class="st">d+'</span>)) </span>
+<span id="cb4-26"><a href="#cb4-26" aria-hidden="true" tabindex="-1"></a>        game_tables[[game_id]] <span class="ot">&lt;&lt;-</span> game_url <span class="sc">%&gt;%</span> <span class="fu">read_html</span>() <span class="sc">%&gt;%</span> <span class="fu">as.character</span>()</span>
+<span id="cb4-27"><a href="#cb4-27" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb4-28"><a href="#cb4-28" aria-hidden="true" tabindex="-1"></a>    game_tables[[game_id]]</span>
+<span id="cb4-29"><a href="#cb4-29" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-30"><a href="#cb4-30" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-31"><a href="#cb4-31" aria-hidden="true" tabindex="-1"></a><span class="co"># Loop over each team URL</span></span>
+<span id="cb4-32"><a href="#cb4-32" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (iteam <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(teams)) {</span>
+<span id="cb4-33"><a href="#cb4-33" aria-hidden="true" tabindex="-1"></a>    <span class="fu">message</span>(<span class="fu">sprintf</span>(<span class="st">"scraping stats for %s in %s (%d/%d)"</span>, </span>
+<span id="cb4-34"><a href="#cb4-34" aria-hidden="true" tabindex="-1"></a>        teams<span class="sc">$</span>team[iteam], teams<span class="sc">$</span>division[iteam], iteam, <span class="fu">nrow</span>(teams)))</span>
+<span id="cb4-35"><a href="#cb4-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-36"><a href="#cb4-36" aria-hidden="true" tabindex="-1"></a>    team_name <span class="ot">=</span> teams<span class="sc">$</span>team[iteam]</span>
+<span id="cb4-37"><a href="#cb4-37" aria-hidden="true" tabindex="-1"></a>    team_webpage <span class="ot">&lt;-</span> <span class="fu">read_html</span>(teams<span class="sc">$</span>team_stats[iteam])</span>
+<span id="cb4-38"><a href="#cb4-38" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-39"><a href="#cb4-39" aria-hidden="true" tabindex="-1"></a>    team_tables <span class="ot">&lt;-</span> team_webpage <span class="sc">%&gt;%</span> <span class="fu">html_nodes</span>(<span class="st">"table"</span>)</span>
+<span id="cb4-40"><a href="#cb4-40" aria-hidden="true" tabindex="-1"></a>    player_stats <span class="ot">&lt;-</span> team_tables <span class="sc">%&gt;%</span> .[<span class="dv">2</span>] <span class="sc">%&gt;%</span> <span class="fu">html_table</span>(<span class="at">header =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> .[[<span class="dv">1</span>]] <span class="sc">%&gt;%</span> <span class="fu">promote_header</span>()</span>
+<span id="cb4-41"><a href="#cb4-41" aria-hidden="true" tabindex="-1"></a>    game_list <span class="ot">&lt;-</span>    team_tables <span class="sc">%&gt;%</span> .[<span class="dv">1</span>] <span class="sc">%&gt;%</span> <span class="fu">html_table</span>(<span class="at">header =</span> <span class="cn">TRUE</span>) <span class="sc">%&gt;%</span> .[[<span class="dv">1</span>]] <span class="sc">%&gt;%</span> <span class="fu">promote_header</span>() </span>
+<span id="cb4-42"><a href="#cb4-42" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-43"><a href="#cb4-43" aria-hidden="true" tabindex="-1"></a>    <span class="co">#fix duplicate Goals headers</span></span>
+<span id="cb4-44"><a href="#cb4-44" aria-hidden="true" tabindex="-1"></a>    game_cols <span class="ot">&lt;-</span> <span class="fu">names</span>(game_list) </span>
+<span id="cb4-45"><a href="#cb4-45" aria-hidden="true" tabindex="-1"></a>    fix_cols <span class="ot">&lt;-</span> <span class="fu">which</span>(game_cols <span class="sc">==</span> <span class="st">'Goals'</span>)</span>
+<span id="cb4-46"><a href="#cb4-46" aria-hidden="true" tabindex="-1"></a>    game_cols[fix_cols[<span class="dv">1</span>]] <span class="ot">&lt;-</span> <span class="st">'Away Goals'</span></span>
+<span id="cb4-47"><a href="#cb4-47" aria-hidden="true" tabindex="-1"></a>    game_cols[fix_cols[<span class="dv">2</span>]] <span class="ot">&lt;-</span> <span class="st">'Home Goals'</span></span>
+<span id="cb4-48"><a href="#cb4-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">names</span>(game_list) <span class="ot">&lt;-</span> game_cols</span>
+<span id="cb4-49"><a href="#cb4-49" aria-hidden="true" tabindex="-1"></a>    game_list <span class="ot">&lt;-</span> game_list <span class="sc">%&gt;%</span> </span>
+<span id="cb4-50"><a href="#cb4-50" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">Date =</span> <span class="fu">mdy</span>(<span class="fu">paste</span>(Date, game_year))) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-51"><a href="#cb4-51" aria-hidden="true" tabindex="-1"></a>        <span class="fu">filter</span>(<span class="fu">str_detect</span>(Type, <span class="st">'Regular'</span>)) <span class="co"># exclude "Preseason" and "Exhibition"</span></span>
+<span id="cb4-52"><a href="#cb4-52" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-53"><a href="#cb4-53" aria-hidden="true" tabindex="-1"></a>    <span class="co"># game_list &lt;- game_list %&gt;% </span></span>
+<span id="cb4-54"><a href="#cb4-54" aria-hidden="true" tabindex="-1"></a>    <span class="co">#     filter(str_detect(Game, "\\*$")) ## remove future and in progress games</span></span>
+<span id="cb4-55"><a href="#cb4-55" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-56"><a href="#cb4-56" aria-hidden="true" tabindex="-1"></a>    player_stats <span class="ot">&lt;-</span> player_stats <span class="sc">%&gt;%</span> </span>
+<span id="cb4-57"><a href="#cb4-57" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="dv">3</span><span class="sc">:</span><span class="fu">ncol</span>(.), as.numeric)) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-58"><a href="#cb4-58" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">Team =</span> teams<span class="sc">$</span>team[iteam], </span>
+<span id="cb4-59"><a href="#cb4-59" aria-hidden="true" tabindex="-1"></a>               <span class="at">Division =</span> teams<span class="sc">$</span>division[iteam], </span>
+<span id="cb4-60"><a href="#cb4-60" aria-hidden="true" tabindex="-1"></a>               <span class="at">Rank =</span> teams<span class="sc">$</span>division_rank[iteam])</span>
+<span id="cb4-61"><a href="#cb4-61" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-62"><a href="#cb4-62" aria-hidden="true" tabindex="-1"></a>    <span class="co">#get game info but don't process it yet</span></span>
+<span id="cb4-63"><a href="#cb4-63" aria-hidden="true" tabindex="-1"></a>    <span class="fu">walk</span>(game_list<span class="sc">$</span>Game, get_scoring_html, <span class="at">verbose =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb4-64"><a href="#cb4-64" aria-hidden="true" tabindex="-1"></a>    games <span class="ot">&lt;-</span> <span class="fu">tibble</span>(<span class="at">Team =</span> teams<span class="sc">$</span>team[iteam], </span>
+<span id="cb4-65"><a href="#cb4-65" aria-hidden="true" tabindex="-1"></a>               <span class="at">Division =</span> teams<span class="sc">$</span>division[iteam]</span>
+<span id="cb4-66"><a href="#cb4-66" aria-hidden="true" tabindex="-1"></a>    ) <span class="sc">%&gt;%</span> <span class="fu">bind_cols</span>(</span>
+<span id="cb4-67"><a href="#cb4-67" aria-hidden="true" tabindex="-1"></a>        game_list <span class="sc">%&gt;%</span> </span>
+<span id="cb4-68"><a href="#cb4-68" aria-hidden="true" tabindex="-1"></a>        <span class="fu">select</span>(Game, Date, Home, Away, <span class="st">`</span><span class="at">Home Goals</span><span class="st">`</span>, <span class="st">`</span><span class="at">Away Goals</span><span class="st">`</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb4-69"><a href="#cb4-69" aria-hidden="true" tabindex="-1"></a>        <span class="fu">mutate</span>(<span class="at">home =</span> Home <span class="sc">==</span> team_name,</span>
+<span id="cb4-70"><a href="#cb4-70" aria-hidden="true" tabindex="-1"></a>               <span class="at">shootout =</span> <span class="fu">str_detect</span>(<span class="fu">paste0</span>(<span class="st">`</span><span class="at">Home Goals</span><span class="st">`</span>, <span class="st">`</span><span class="at">Away Goals</span><span class="st">`</span>), <span class="st">'S'</span>),</span>
+<span id="cb4-71"><a href="#cb4-71" aria-hidden="true" tabindex="-1"></a>               <span class="st">`</span><span class="at">Home Goals</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">str_extract</span>(<span class="st">`</span><span class="at">Home Goals</span><span class="st">`</span>, <span class="st">'</span><span class="sc">\\</span><span class="st">d+'</span>)),</span>
+<span id="cb4-72"><a href="#cb4-72" aria-hidden="true" tabindex="-1"></a>               <span class="st">`</span><span class="at">Away Goals</span><span class="st">`</span> <span class="ot">=</span> <span class="fu">as.numeric</span>(<span class="fu">str_extract</span>(<span class="st">`</span><span class="at">Away Goals</span><span class="st">`</span>, <span class="st">'</span><span class="sc">\\</span><span class="st">d+'</span>)),</span>
+<span id="cb4-73"><a href="#cb4-73" aria-hidden="true" tabindex="-1"></a>               <span class="at">home_diff =</span> <span class="st">`</span><span class="at">Home Goals</span><span class="st">`</span> <span class="sc">-</span> <span class="st">`</span><span class="at">Away Goals</span><span class="st">`</span></span>
+<span id="cb4-74"><a href="#cb4-74" aria-hidden="true" tabindex="-1"></a>        ) </span>
+<span id="cb4-75"><a href="#cb4-75" aria-hidden="true" tabindex="-1"></a>    ) </span>
+<span id="cb4-76"><a href="#cb4-76" aria-hidden="true" tabindex="-1"></a>    all_games <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(all_games, games)</span>
+<span id="cb4-77"><a href="#cb4-77" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb4-78"><a href="#cb4-78" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Append the table to final_data</span></span>
+<span id="cb4-79"><a href="#cb4-79" aria-hidden="true" tabindex="-1"></a>  players <span class="ot">&lt;-</span> <span class="fu">bind_rows</span>(players, player_stats)</span>
+<span id="cb4-80"><a href="#cb4-80" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-81"><a href="#cb4-81" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Camel TDs in 1 (1/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 390931*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 391949*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Dangle Berries in 1 (2/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Americans in 1 (3/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 390930*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Pager Flakes in 1 (4/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Boozehounds in 1 (5/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Dung Beetle in 2 (6/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 391445*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392612*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Battalion in 2 (7/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 394887*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 391945*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Academic Weapons in 2 (8/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Diablos in 2 (9/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Marauders in 3A (10/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Devcon HC in 3A (11/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392463*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Norcal Leafs in 3A (12/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Dragons in 3A (13/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Knights in 3A (14/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Beerhawks in 3B (15/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for TBD in 3B (16/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Black Mambas in 3B (17/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for 2nd Battalion in 3B (18/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Time to Score in 3B (19/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Ham Candle in 4A (20/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Double Secret Probation in 4A (21/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Mermen in 4A (22/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for OHC in 4A (23/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Shocker in 4A (24/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Goon and Friends in 4B (25/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 391946*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392457*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Junkies in 4B (26/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392441*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for K-Wings Supreme in 4B (27/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 393839*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392443*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Money Shots in 4B (28/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 394846*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392442*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Good Guys in 4B (29/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 391944*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Misfits in 4B (30/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Southsiders in 4B (31/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for NVIDIA in 4B (32/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Grizzlies in 4B (33/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392613*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Red Dogs in 4B (34/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Norcal Crossover in 4B (35/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Royals 1 in 5A (36/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 391948*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389626*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Nuggets in 5A (37/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392460*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389624*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Blackhawks in 5A (38/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392459*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Chupacabra in 5A (39/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 393840*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389615*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Mermen Too in 5A (40/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 391950*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 394851*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Jets in 5A (41/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Irish Car Bombs in 5A (42/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for French Toast in 5A (43/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389612*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Cant Stop Wont Stop in 5A (44/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Longhorns 2.0 in 5A (45/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Mucho Macho  Muchachos in 5B (46/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for LinkedIn in 5B (47/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for EDWS in 5B (48/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Wolverines 1 in 5B (49/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Norcal Crossover Batalion in 5B (50/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Money Shots II in 5B (51/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Taquieria Con Carne in 5B (52/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Time Lords in 5B (53/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Kraken Beers in 5B (54/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for K-Wings in 6A (55/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392445*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Stampede in 6A (56/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Cereal Killers in 6A (57/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392458*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for The Fruit Company in 6A (58/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 394852*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Irish Car Bombs 2 in 6A (59/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392436*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Bandits 1 in 6A (60/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392461*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Rangers in 6A (61/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Rogue Squadron in 6A (62/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392444*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Hooligans in 6A (63/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for SJ Sofa Kings in 6A (64/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392462*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Team America in 6A (65/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Peter North Stars in 6A (66/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Tyrannosaurs in 6A (67/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for SJ Beer League Dev. Program in 6B (68/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392439*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389609*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Thresher Sharks in 6B (69/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392447*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Raccoons in 6B (70/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Blade Runners in 6B (71/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 395416*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Royals 2 in 6B (72/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392446*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389604*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Seal Team Sticks in 6B (73/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392437*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Stanleys Closers in 6B (74/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389602*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Falcons in 6B (75/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392438*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389608*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Leftovers in 6B (76/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Pacific Predators in 6B (77/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Purple Cobras in 6B (78/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Yavin 4 Rebels in 6B (79/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Chieftains in 6B (80/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Ice Breakers in 6B (81/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Bandits 2 in 7A (82/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Royals 3 in 7A (83/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Rebel Scum 1 in 7A (84/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Irish Car Bombs 3 in 7A (85/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Red Dragons in 7A (86/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392440*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Beaver Dragons in 7A (87/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 394853*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Hectors Pool Service in 7A (88/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for OHC 2 in 7A (89/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Gang Green in 7A (90/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Cant Score Wont Score in 7A (91/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for CineLux Theatres in 7A (92/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Choking Hazards in 7B East (93/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389599*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for 3rd Line Scrubs in 7B East (94/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389611*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Schrute Farms in 7B East (95/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389605*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Rebel Scum 2 in 7B East (96/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389623*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Tsunami in 7B East (97/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389614*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Buffalo Wings in 7B East (98/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Destroyers in 7B East (99/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Swashpucklers in 7B East (100/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Team Beer in 7B East (101/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Cobra Kai 1 in 7B East (102/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Whiskey Richards in 7B West (103/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389600*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Seal Team Sticks 2 in 7B West (104/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Avengers in 7B West (105/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389597*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Night Hawks 2 in 7B West (106/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Ravens in 7B West (107/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389610*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Chiefs 2 in 7B West (108/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 389598*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Fighting Icecocks 2 in 7B West (109/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Red Hawks in 7B West (110/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for EDWS 2 in 7B West (111/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Flying Pandas in 7B West (112/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Irish Car Bombs 4 in 8A (113/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 390558*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 394838*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Thresher Sharks 2 in 8A (114/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392610*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Seal Team Sticks 3 in 8A (115/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 392609*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Stiflers Mom 1 in 8A (116/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 390559*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Ice Badgers in 8A (117/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 391446*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Draggin Iceholes in 8A (118/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Cant Skate Wont Skate in 8A (119/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Ice Monkeys in 8A (120/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Night Hawks 3 in 8B (121/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 390928*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Seal Team Sticks 4 in 8B (122/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Unhealthy Scratch in 8B (123/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 390923*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Cobra Kai 2 in 8B (124/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 390927*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Rebel Scum 3 in 8B (125/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Ice Force in 8B (126/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Capturing game 390922*</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Chiefs 4 in 8B (127/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Rebels in 8B (128/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Habs in 8B (129/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for BK 10 in 8B (130/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Puckaneers in 8B (131/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for JuggerNots in 9 (132/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Chiefs 5 in 9 (133/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Lil Puckers in 9 (134/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for A-Team in 9 (135/136)</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>scraping stats for Rebel Scum 4 in 9 (136/136)</code></pre>
+</div>
+</div>
+<p>Save files to disk</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb206"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb206-1"><a href="#cb206-1" aria-hidden="true" tabindex="-1"></a>player_file <span class="ot">=</span> <span class="fu">here</span>(<span class="st">'data'</span>, <span class="fu">sprintf</span>(<span class="st">"player_stats-%s.RDS"</span>, season))</span>
+<span id="cb206-2"><a href="#cb206-2" aria-hidden="true" tabindex="-1"></a>games_file <span class="ot">=</span> <span class="fu">here</span>(<span class="st">'data'</span>, <span class="fu">sprintf</span>(<span class="st">"games_stats-%s.RDS"</span>, season))</span>
+<span id="cb206-3"><a href="#cb206-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(players, <span class="at">file =</span> player_file)</span>
+<span id="cb206-4"><a href="#cb206-4" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(all_games, <span class="at">file =</span> games_file)</span>
+<span id="cb206-5"><a href="#cb206-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(seasons, <span class="at">file =</span> <span class="fu">here</span>(<span class="st">'data'</span>, season_file))</span>
+<span id="cb206-6"><a href="#cb206-6" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(game_tables, <span class="at">file =</span> game_tables_file)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>
