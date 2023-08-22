@@ -25,7 +25,7 @@ Type 'q()' to quit R.
 > 
 > library(here)
 here() starts at /Users/davehurst/Documents/GitHub/siahl-ringers
-> source(here('siahl-utils.R'))
+> source(here('code/siahl-utils.R'))
 ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
 ✔ dplyr     1.1.2     ✔ readr     2.1.4
 ✔ forcats   1.0.0     ✔ stringr   1.5.0
@@ -51,7 +51,7 @@ The following object is masked from ‘package:readr’:
     guess_encoding
 
 > 
-> shiny_dir <- 'siahl_ringers'
+> shiny_dir <- 'code/siahl_ringers'
 > 
 > load(here('data', "siahl-eda-Current.qmd.RData"))
 > saveRDS(all_teams, file = here(shiny_dir, "all_teams-Current.RDS" ))
@@ -73,4 +73,4 @@ The following object is masked from ‘package:readr’:
 > 
 > proc.time()
    user  system elapsed 
-  1.673   0.145   1.848 
+  1.718   0.153   1.891 

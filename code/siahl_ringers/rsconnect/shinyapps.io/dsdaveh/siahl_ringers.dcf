@@ -5,8 +5,6 @@ account: dsdaveh
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 9432230
-bundleId: 7598161
+bundleId: 7598294
 url: https://dsdaveh.shinyapps.io/siahl_ringers/
 version: 1
-asMultiple: FALSE
-asStatic: FALSE

@@ -271,7 +271,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a><span class="fu">message</span>(<span class="st">"... "</span>, progress_count, <span class="st">" games processed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
-<pre><code>... 65 games processed</code></pre>
+<pre><code>... 0 games processed</code></pre>
 </div>
 </div>
 <div class="cell">
@@ -753,9 +753,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <tr><td headers="Level" class="gt_row gt_right">8</td>
 <td headers="affected" class="gt_row gt_right">0.05839416</td></tr>
     <tr><td headers="Level" class="gt_row gt_right">7</td>
-<td headers="affected" class="gt_row gt_right">0.08256881</td></tr>
+<td headers="affected" class="gt_row gt_right">0.08108108</td></tr>
     <tr><td headers="Level" class="gt_row gt_right">6</td>
-<td headers="affected" class="gt_row gt_right">0.07000000</td></tr>
+<td headers="affected" class="gt_row gt_right">0.07389163</td></tr>
     <tr><td headers="Level" class="gt_row gt_right">5</td>
 <td headers="affected" class="gt_row gt_right">0.04929577</td></tr>
     <tr><td headers="Level" class="gt_row gt_right">4</td>
@@ -876,30 +876,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb17-35"><a href="#cb17-35" aria-hidden="true" tabindex="-1"></a>                                    <span class="at">angle =</span> <span class="dv">20</span>, <span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.1</span>, <span class="st">"inches"</span>)))</span>
 <span id="cb17-36"><a href="#cb17-36" aria-hidden="true" tabindex="-1"></a>}</span>
 <span id="cb17-37"><a href="#cb17-37" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>illustrative_game_id <span class="ot">&lt;-</span> <span class="st">"387361*"</span></span>
-<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a>axis_range <span class="ot">&lt;-</span> <span class="fu">range</span>(<span class="fu">c</span>(worst_case_season<span class="sc">$</span>goal_diff, worst_case_season<span class="sc">$</span>adj_gdiff), <span class="at">na.rm =</span> T)</span>
-<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a>game_note <span class="ot">&lt;-</span> <span class="fu">which</span>(worst_case_season<span class="sc">$</span>Game <span class="sc">==</span> illustrative_game_id)</span>
-<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a>annotate_diff <span class="ot">&lt;-</span> worst_case_season <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="st">`</span><span class="at">Game/ID</span><span class="st">`</span>) <span class="sc">%&gt;%</span> .[game_note, ]</span>
-<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>note_orig <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">" Original Goal</span><span class="sc">\n</span><span class="st">Differential (%d-%d)"</span>, annotate_diff<span class="sc">$</span>goals_for, annotate_diff<span class="sc">$</span>goals_against)</span>
-<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>note_adj <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"Adjusted (%d-%d) "</span>, annotate_diff<span class="sc">$</span>adj_goals_for, annotate_diff<span class="sc">$</span>adj_goals_against)</span>
-<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>goal_diff_plt <span class="ot">&lt;-</span> worst_case_season <span class="sc">%&gt;%</span> </span>
-<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="st">`</span><span class="at">Game/ID</span><span class="st">`</span>, <span class="at">yend =</span> <span class="st">`</span><span class="at">Game/ID</span><span class="st">`</span>, <span class="at">x =</span> goal_diff)) <span class="sc">+</span></span>
-<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>) <span class="sc">+</span> </span>
-<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>    <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">y =</span> game_note <span class="sc">+</span> <span class="fl">1.0</span>, <span class="at">x =</span> annotate_diff<span class="sc">$</span>goal_diff, </span>
-<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>             <span class="at">label =</span> note_orig, <span class="at">hjust =</span> <span class="st">"center"</span>, <span class="at">color =</span> <span class="st">'darkred'</span>) <span class="sc">+</span></span>
-<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a>    <span class="fu">annotate</span>(<span class="st">"text"</span>, <span class="at">y =</span> game_note <span class="sc">+</span> <span class="fl">0.5</span>, <span class="at">x =</span> annotate_diff<span class="sc">$</span>adj_gdiff, </span>
-<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a>             <span class="at">label =</span> note_adj, <span class="at">hjust =</span> <span class="st">"center"</span>, <span class="at">color =</span> <span class="st">'darkred'</span>) <span class="sc">+</span></span>
-<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_arrow</span>(<span class="fu">aes</span>(<span class="at">xend =</span> adj_gdiff), <span class="at">color =</span> <span class="st">"blue"</span>, </span>
-<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> . <span class="sc">%&gt;%</span> <span class="fu">filter</span>(goal_diff <span class="sc">!=</span> adj_gdiff)) <span class="sc">+</span></span>
-<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"Change in goal differential when ringer influenced goals are removed"</span>,</span>
-<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a>            <span class="at">subtitle =</span> <span class="st">"(Arrows touching/passing through 0 indicate a change in Standings points)"</span>) <span class="sc">+</span></span>
-<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">""</span>) <span class="sc">+</span></span>
-<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylab</span>(<span class="fu">sprintf</span>(<span class="st">"%s /Game ID"</span>, worst_offender)) <span class="sc">+</span></span>
-<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(axis_range[<span class="dv">1</span>], axis_range[<span class="dv">2</span>] ,<span class="at">by =</span> <span class="dv">1</span>), <span class="at">minor_breaks =</span> <span class="cn">NULL</span>)</span>
-<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>goal_diff_plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb17-38"><a href="#cb17-38" aria-hidden="true" tabindex="-1"></a>axis_range <span class="ot">&lt;-</span> <span class="fu">range</span>(<span class="fu">c</span>(worst_case_season<span class="sc">$</span>goal_diff, worst_case_season<span class="sc">$</span>adj_gdiff), <span class="at">na.rm =</span> T)</span>
+<span id="cb17-39"><a href="#cb17-39" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-40"><a href="#cb17-40" aria-hidden="true" tabindex="-1"></a><span class="co"># set illustrative_game_id for an improved explantory annotation specific to the plot</span></span>
+<span id="cb17-41"><a href="#cb17-41" aria-hidden="true" tabindex="-1"></a><span class="co">#illustrative_game_id &lt;- "387361*". </span></span>
+<span id="cb17-42"><a href="#cb17-42" aria-hidden="true" tabindex="-1"></a><span class="cf">if</span> (<span class="fu">exists</span>(<span class="st">"illustrative_game_id"</span>)) {</span>
+<span id="cb17-43"><a href="#cb17-43" aria-hidden="true" tabindex="-1"></a>    game_note <span class="ot">&lt;-</span> <span class="fu">which</span>(worst_case_season<span class="sc">$</span>Game <span class="sc">==</span> illustrative_game_id)</span>
+<span id="cb17-44"><a href="#cb17-44" aria-hidden="true" tabindex="-1"></a>    note_orig <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">" Original Goal</span><span class="sc">\n</span><span class="st">Differential (%d-%d)"</span>, annotate_diff<span class="sc">$</span>goals_for, annotate_diff<span class="sc">$</span>goals_against)</span>
+<span id="cb17-45"><a href="#cb17-45" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb17-46"><a href="#cb17-46" aria-hidden="true" tabindex="-1"></a>    note_adj <span class="ot">&lt;-</span> <span class="fu">sprintf</span>(<span class="st">"Adjusted (%d-%d) "</span>, annotate_diff<span class="sc">$</span>adj_goals_for, annotate_diff<span class="sc">$</span>adj_goals_against)</span>
+<span id="cb17-47"><a href="#cb17-47" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb17-48"><a href="#cb17-48" aria-hidden="true" tabindex="-1"></a>    game_note <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb17-49"><a href="#cb17-49" aria-hidden="true" tabindex="-1"></a>    note_orig <span class="ot">&lt;-</span> note_adj <span class="ot">&lt;-</span> <span class="st">""</span></span>
+<span id="cb17-50"><a href="#cb17-50" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb17-51"><a href="#cb17-51" aria-hidden="true" tabindex="-1"></a>    annotate_diff <span class="ot">&lt;-</span> worst_case_season <span class="sc">%&gt;%</span> <span class="fu">arrange</span>(<span class="st">`</span><span class="at">Game/ID</span><span class="st">`</span>) <span class="sc">%&gt;%</span> .[game_note, ]</span>
+<span id="cb17-52"><a href="#cb17-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb17-53"><a href="#cb17-53" aria-hidden="true" tabindex="-1"></a>goal_diff_plt <span class="ot">&lt;-</span> worst_case_season <span class="sc">%&gt;%</span> </span>
+<span id="cb17-54"><a href="#cb17-54" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">y =</span> <span class="st">`</span><span class="at">Game/ID</span><span class="st">`</span>, <span class="at">yend =</span> <span class="st">`</span><span class="at">Game/ID</span><span class="st">`</span>, <span class="at">x =</span> goal_diff)) <span class="sc">+</span></span>
+<span id="cb17-55"><a href="#cb17-55" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_point</span>() <span class="sc">+</span></span>
+<span id="cb17-56"><a href="#cb17-56" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="dv">0</span>) <span class="sc">+</span> </span>
+<span id="cb17-57"><a href="#cb17-57" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb17-58"><a href="#cb17-58" aria-hidden="true" tabindex="-1"></a>    <span class="co"># annotate("text", y = game_note + 1.0, x = annotate_diff$goal_diff, </span></span>
+<span id="cb17-59"><a href="#cb17-59" aria-hidden="true" tabindex="-1"></a>    <span class="co">#          label = note_orig, hjust = "center", color = 'darkred') +</span></span>
+<span id="cb17-60"><a href="#cb17-60" aria-hidden="true" tabindex="-1"></a>    <span class="co"># annotate("text", y = game_note + 0.5, x = annotate_diff$adj_gdiff, </span></span>
+<span id="cb17-61"><a href="#cb17-61" aria-hidden="true" tabindex="-1"></a>    <span class="co">#          label = note_adj, hjust = "center", color = 'darkred') +</span></span>
+<span id="cb17-62"><a href="#cb17-62" aria-hidden="true" tabindex="-1"></a>    <span class="fu">geom_arrow</span>(<span class="fu">aes</span>(<span class="at">xend =</span> adj_gdiff), <span class="at">color =</span> <span class="st">"blue"</span>, </span>
+<span id="cb17-63"><a href="#cb17-63" aria-hidden="true" tabindex="-1"></a>               <span class="at">data =</span> . <span class="sc">%&gt;%</span> <span class="fu">filter</span>(goal_diff <span class="sc">!=</span> adj_gdiff)) <span class="sc">+</span></span>
+<span id="cb17-64"><a href="#cb17-64" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ggtitle</span>(<span class="st">"Change in goal differential when ringer influenced goals are removed"</span>,</span>
+<span id="cb17-65"><a href="#cb17-65" aria-hidden="true" tabindex="-1"></a>            <span class="at">subtitle =</span> <span class="st">"(Arrows touching/passing through 0 indicate a change in Standings points)"</span>) <span class="sc">+</span></span>
+<span id="cb17-66"><a href="#cb17-66" aria-hidden="true" tabindex="-1"></a>    <span class="fu">xlab</span>(<span class="st">""</span>) <span class="sc">+</span></span>
+<span id="cb17-67"><a href="#cb17-67" aria-hidden="true" tabindex="-1"></a>    <span class="fu">ylab</span>(<span class="fu">sprintf</span>(<span class="st">"%s /Game ID"</span>, worst_offender)) <span class="sc">+</span></span>
+<span id="cb17-68"><a href="#cb17-68" aria-hidden="true" tabindex="-1"></a>    <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">seq</span>(axis_range[<span class="dv">1</span>], axis_range[<span class="dv">2</span>] ,<span class="at">by =</span> <span class="dv">1</span>), <span class="at">minor_breaks =</span> <span class="cn">NULL</span>)</span>
+<span id="cb17-69"><a href="#cb17-69" aria-hidden="true" tabindex="-1"></a>goal_diff_plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stderr">
 <pre><code>Warning: Removed 1 rows containing missing values (`geom_point()`).</code></pre>
 </div>
@@ -1110,23 +1118,23 @@ lm(formula = PPG ~ ., data = pts_model_data %&gt;% select(-Name,
 
 Residuals:
     Min      1Q  Median      3Q     Max 
--1.1772 -0.4611 -0.1306  0.3268  4.1332 
+-1.1793 -0.4605 -0.1331  0.3240  4.1333 
 
 Coefficients:
-                Estimate Std. Error t value Pr(&gt;|t|)    
-(Intercept)     1.607614   0.101069  15.906  &lt; 2e-16 ***
-DivLevel       -0.063533   0.007038  -9.027  &lt; 2e-16 ***
-GP              0.013883   0.003170   4.380 1.22e-05 ***
-GP_other_teams  0.005680   0.001106   5.136 2.97e-07 ***
-player_games   -0.002850   0.000670  -4.253 2.17e-05 ***
-Rank           -0.032504   0.003840  -8.464  &lt; 2e-16 ***
-ringer_count    0.234657   0.080471   2.916  0.00357 ** 
+                 Estimate Std. Error t value Pr(&gt;|t|)    
+(Intercept)     1.5853139  0.0990059  16.012  &lt; 2e-16 ***
+DivLevel       -0.0635944  0.0070696  -8.995  &lt; 2e-16 ***
+GP              0.0138824  0.0031398   4.421 1.01e-05 ***
+GP_other_teams  0.0055923  0.0010946   5.109 3.42e-07 ***
+player_games   -0.0026880  0.0006585  -4.082 4.57e-05 ***
+Rank           -0.0322674  0.0037955  -8.501  &lt; 2e-16 ***
+ringer_count    0.2273516  0.0803253   2.830  0.00468 ** 
 ---
 Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 
-Residual standard error: 0.656 on 3352 degrees of freedom
-Multiple R-squared:  0.08478,   Adjusted R-squared:  0.08314 
-F-statistic: 51.75 on 6 and 3352 DF,  p-value: &lt; 2.2e-16</code></pre>
+Residual standard error: 0.6549 on 3353 degrees of freedom
+Multiple R-squared:  0.08448,   Adjusted R-squared:  0.08284 
+F-statistic: 51.56 on 6 and 3353 DF,  p-value: &lt; 2.2e-16</code></pre>
 </div>
 </div>
 <div class="cell">
