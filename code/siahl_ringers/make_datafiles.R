@@ -5,7 +5,7 @@
 ## App deployment -- ignore warnings
 
 library(here)
-source(here('siahl-utils.R'))
+source(here('code/siahl-utils.R'))
 
 shiny_dir <- 'code/siahl_ringers'
 
