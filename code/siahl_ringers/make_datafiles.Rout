@@ -73,4 +73,4 @@ The following object is masked from ‘package:readr’:
 > 
 > proc.time()
    user  system elapsed 
-  1.718   0.153   1.891 
+  1.698   0.141   1.833 

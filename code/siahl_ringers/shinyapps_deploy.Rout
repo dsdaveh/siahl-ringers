@@ -23,27 +23,25 @@ Type 'q()' to quit R.
 ✔ Re-deploying "siahl_ringers" to "server: shinyapps.io / username: dsdaveh"
 ℹ Looking up application with id 9432230...
 ✔ Found application <https://dsdaveh.shinyapps.io/siahl_ringers/>
-ℹ Bundling 10 files: 'affected_games.csv', 'all_teams-Current.RDS', 'games_stats-Current.RDS', 'make_datafiles.R', 'scorecards.RDS', 'server.R', 'shinyapps_deploy.R', 'siahl-utils.R', 'ui.R', and 'www/custom.css'
+ℹ Bundling 12 files: 'affected_games.csv', 'all_teams-Current.RDS', 'games_stats-Current.RDS', 'make_datafiles.R', 'make_datafiles.Rout', 'scorecards.RDS', 'server.R', 'shinyapps_deploy.R', 'shinyapps_deploy.Rout', 'siahl-utils.R', 'ui.R', and 'www/custom.css'
 ℹ Capturing R dependencies with renv
 ✔ Found 136 dependencies
-✔ Created 239,302b bundle
+✔ Created 241,249b bundle
 ℹ Uploading bundle...
-✔ Uploaded bundle with id 7594848
+✔ Uploaded bundle with id 7598336
 ── Deploying to server ─────────────────────────────────────────────────────────
-Waiting for task: 1328897933
-  building: Parsing manifest
-  building: Building image: 8986442
+Waiting for task: 1329196898
+  building: Building image: 8991450
   building: Installing system dependencies
   building: Fetching packages
   building: Installing packages
   building: Installing files
-  building: Pushing image: 8986442
+  building: Pushing image: 8991450
   deploying: Starting instances
-  rollforward: Activating new instances
-  terminating: Stopping old instances
+  unstaging: Stopping old instances
 ── Deployment complete ─────────────────────────────────────────────────────────
 ✔ Successfully deployed to <https://dsdaveh.shinyapps.io/siahl_ringers/>
 > 
 > proc.time()
    user  system elapsed 
- 10.774   4.865 139.338 
+ 10.352   4.664 137.333 

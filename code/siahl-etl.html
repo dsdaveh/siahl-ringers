@@ -468,9 +468,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>scraping stats for Thresher Sharks in 6B (68/136)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Capturing game 390104*</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
 <pre><code>scraping stats for SJ Beer League Dev. Program in 6B (69/136)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
@@ -486,13 +483,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>scraping stats for Seal Team Sticks in 6B (73/136)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Capturing game 390108*</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
 <pre><code>scraping stats for Leftovers in 6B (74/136)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Capturing game 392614*</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>scraping stats for Pacific Predators in 6B (75/136)</code></pre>
@@ -525,9 +516,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>scraping stats for Red Dragons in 7A (84/136)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Capturing game 390117*</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
 <pre><code>scraping stats for Rebel Scum 1 in 7A (85/136)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
@@ -537,13 +525,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <pre><code>scraping stats for Beaver Dragons in 7A (87/136)</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
-<pre><code>Capturing game 390110*</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
 <pre><code>scraping stats for OHC 2 in 7A (88/136)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Capturing game 390103*</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>scraping stats for Hectors Pool Service in 7A (89/136)</code></pre>
@@ -589,9 +571,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>scraping stats for Seal Team Sticks 2 in 7B West (103/136)</code></pre>
-</div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Capturing game 390107*</code></pre>
 </div>
 <div class="cell-output cell-output-stderr">
 <pre><code>scraping stats for Whiskey Richards in 7B West (104/136)</code></pre>
@@ -695,12 +674,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>Save files to disk</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb148"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb148-1"><a href="#cb148-1" aria-hidden="true" tabindex="-1"></a>player_file <span class="ot">=</span> <span class="fu">here</span>(<span class="st">'data'</span>, <span class="fu">sprintf</span>(<span class="st">"player_stats-%s.RDS"</span>, season))</span>
-<span id="cb148-2"><a href="#cb148-2" aria-hidden="true" tabindex="-1"></a>games_file <span class="ot">=</span> <span class="fu">here</span>(<span class="st">'data'</span>, <span class="fu">sprintf</span>(<span class="st">"games_stats-%s.RDS"</span>, season))</span>
-<span id="cb148-3"><a href="#cb148-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(players, <span class="at">file =</span> player_file)</span>
-<span id="cb148-4"><a href="#cb148-4" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(all_games, <span class="at">file =</span> games_file)</span>
-<span id="cb148-5"><a href="#cb148-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(seasons, <span class="at">file =</span> <span class="fu">here</span>(<span class="st">'data'</span>, season_file))</span>
-<span id="cb148-6"><a href="#cb148-6" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(game_tables, <span class="at">file =</span> game_tables_file)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb141"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb141-1"><a href="#cb141-1" aria-hidden="true" tabindex="-1"></a>player_file <span class="ot">=</span> <span class="fu">here</span>(<span class="st">'data'</span>, <span class="fu">sprintf</span>(<span class="st">"player_stats-%s.RDS"</span>, season))</span>
+<span id="cb141-2"><a href="#cb141-2" aria-hidden="true" tabindex="-1"></a>games_file <span class="ot">=</span> <span class="fu">here</span>(<span class="st">'data'</span>, <span class="fu">sprintf</span>(<span class="st">"games_stats-%s.RDS"</span>, season))</span>
+<span id="cb141-3"><a href="#cb141-3" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(players, <span class="at">file =</span> player_file)</span>
+<span id="cb141-4"><a href="#cb141-4" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(all_games, <span class="at">file =</span> games_file)</span>
+<span id="cb141-5"><a href="#cb141-5" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(seasons, <span class="at">file =</span> <span class="fu">here</span>(<span class="st">'data'</span>, season_file))</span>
+<span id="cb141-6"><a href="#cb141-6" aria-hidden="true" tabindex="-1"></a><span class="fu">saveRDS</span>(game_tables, <span class="at">file =</span> game_tables_file)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 
 </main>
